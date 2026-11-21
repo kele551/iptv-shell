@@ -7,7 +7,7 @@
 它只做本机可查、低风险的事（不发包扫描外网、不试密码）：
   1. 本机正在跑的服务端口（可能已经是别人接好的数据源）
   2. 本机磁盘上的 m3u / m3u8 / xmltv 清单（现成可用的最多）
-  3. 已有的 IPTV 项目与配置（云南这套、LIVE直播源、模板自己）
+  3. 已有的 IPTV 项目与配置（本机已跑通的 IPTV 项目、模板自己）
   4. 系统里有没有 IPTV 相关的抓源档案 / 账号配置（只看存在与否，不打印内容）
 
 用法：
@@ -191,7 +191,7 @@ def main():
             n, nm = _taste(p)
             print('   - %-64s %d 条／%s' % (p, n, (nm[:46] + '…') if len(nm) > 46 else nm))
 
-    print('\n3) 已有的 IPTV / 直播项目（可以直接照 yunnan_dx.py 转发）')
+    print('\n3) 已有的 IPTV / 直播项目（可以直接照 转发示例.py 转发）')
     for p in data['projects'] or ['（无）']:
         print('   - %s' % p)
 
@@ -200,7 +200,7 @@ def main():
     print('             台名是频道（CCTV / 卫视 / 本地台）的那份当直播填 m3u_path；')
     print('             名字是剧名/片名、条数不多、没有频道号的那份当点播填 vod_m3u（接点播用）；')
     print('             只有一份就只填 m3u_path，点播页签照样在、进去显示空态')
-    print('   有服务  → 照 providers/yunnan_dx.py 写一个转发适配器')
+    print('   有服务  → 照 providers/转发示例.py 写一个转发适配器')
     print('   都没有  → 这时才去问用户：盒子型号 / 是不是运营商 IPTV / 有没有抓源档案')
     print('             （问不到也可以让用户把 m3u 拖进 data\\ 目录，用 --roots 再跑一遍）')
     print('   接完都要跑：python tools/模板快检.py --provider <线路>')
