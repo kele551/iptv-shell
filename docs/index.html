@@ -35,11 +35,14 @@ nav a.n:hover{color:var(--ink)}
 .hero .grid{display:grid;grid-template-columns:1.02fr .98fr;gap:52px;align-items:center}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--sub);
   background:#f1eee8;border:1px solid var(--line);border-radius:999px;padding:5px 12px}
-h1{font-size:58px;line-height:1.1;letter-spacing:-1.5px;margin:20px 0 14px;font-weight:750}
+h1{font-size:clamp(34px,3.6vw,52px);line-height:1.12;letter-spacing:-1px;margin:20px 0 14px;font-weight:750}
 h1 span{color:var(--sub);font-weight:400}
 .lede{font-size:19px;color:var(--sub);max-width:30em;margin:0 0 26px}
 .lede b{color:var(--ink);font-weight:600}
 .hero .acts{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.hero .badges{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:24px;opacity:.95}
+.hero .badges img{height:22px;width:auto;display:block}
+.hero .badges a{line-height:0}
 .hero .shot{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#0d1219;
   box-shadow:0 24px 60px -28px rgba(20,22,26,.42)}
 .hero .shot img{width:100%}
@@ -172,6 +175,19 @@ footer .r{margin-left:auto;color:#9aa0a8;font-size:13px}
       <a class="btn pri" href="#install">三步用起来</a>
       <button class="btn" id="copyTop">复制给智能体的一句话</button>
       <a class="btn" href="https://github.com/kele551/iptv-shell" target="_blank" rel="noopener">看源码</a>
+    </div>
+    <div class="badges">
+      <a href="https://github.com/kele551/iptv-shell" target="_blank" rel="noopener"><img alt="Downloads" src="https://img.shields.io/badge/%E4%B8%8B%E8%BD%BD-%E6%BA%90%E7%A0%81zip-1f5fd0?style=flat-square"></a>
+      <a href="https://hits.sh/github.com/kele551/iptv-shell/" target="_blank" rel="noopener"><img alt="浏览量" src="https://hits.sh/github.com/kele551/iptv-shell.svg?label=views&color=1f5fd0"></a>
+      <a href="https://github.com/kele551/iptv-shell/blob/main/LICENSE" target="_blank" rel="noopener"><img alt="License" src="https://img.shields.io/badge/license-MIT-1f5fd0?style=flat-square"></a>
+      <img alt="Platform" src="https://img.shields.io/badge/platform-Windows-1f5fd0?style=flat-square">
+      <img alt="Python" src="https://img.shields.io/badge/python-3.9%2B-1f5fd0?style=flat-square">
+      <img alt="Last Commit" src="https://img.shields.io/github/last-commit/kele551/iptv-shell?style=flat-square&label=last%20commit&color=1f5fd0">
+      <a href="https://github.com/kele551/iptv-shell/stargazers" target="_blank" rel="noopener"><img alt="Star" src="https://img.shields.io/github/stars/kele551/iptv-shell?style=flat-square&logo=github&label=star&color=gold"></a>
+      <a href="https://github.com/kele551/iptv-shell/network/members" target="_blank" rel="noopener"><img alt="Fork" src="https://img.shields.io/github/forks/kele551/iptv-shell?style=flat-square&label=fork&color=1f5fd0"></a>
+      <img alt="Form" src="https://img.shields.io/badge/%E5%BD%A2%E6%80%81-%E6%9C%AC%E6%9C%BA%E7%BD%91%E9%A1%B5%E5%A4%96%E5%A3%B3-1f5fd0?style=flat-square">
+      <img alt="Free" src="https://img.shields.io/badge/%E8%B4%B9%E7%94%A8-%E5%85%8D%E8%B4%B9%E6%97%A0%E5%B9%BF%E5%91%8A-16a34a?style=flat-square">
+      <img alt="No Tracking" src="https://img.shields.io/badge/%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE-%E4%B8%8D%E9%87%87%E9%9B%86%E4%B8%8D%E4%B8%8A%E4%BC%A0-16a34a?style=flat-square">
     </div>
   </div>
   <div class="shot"><img src="img/live.png" alt="直播台表与三色节目单"></div>
