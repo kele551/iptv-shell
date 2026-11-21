@@ -329,11 +329,18 @@ def _powershell():
 
 
 def _make_lnk(lnk, exe, desc):
+    # 图标源优先用 exe 同级的独立 .ico 文件，而不是 exe 本身：
+    # Windows 会缓存 exe 的图标，exe 一换版本/重启就可能显示成白板或默认图标
+    # （2026-11-21 实测）。独立的 ico 文件不进缓存链，重启后图标稳定。
+    icon = os.path.join(os.path.dirname(os.path.abspath(exe)), 'IPTV外壳.ico')
+    if not os.path.isfile(icon):
+        icon = exe  # 老包没带 ico 时退回 exe（保持兼容）
+    icon_loc = (icon + ',0') if icon != exe else (exe + ',0')
     ps = ('$ws=New-Object -ComObject WScript.Shell;'
           '$s=$ws.CreateShortcut("%s");'
           '$s.TargetPath="%s";$s.WorkingDirectory="%s";'
-          '$s.IconLocation="%s,0";$s.Description="%s";$s.Save()'
-          % (lnk, exe, BASE, exe, desc))
+          '$s.IconLocation="%s";$s.Description="%s";$s.Save()'
+          % (lnk, exe, BASE, icon_loc, desc))
     sh = _powershell()
     if not sh:
         return False

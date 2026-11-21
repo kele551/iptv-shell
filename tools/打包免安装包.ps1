@@ -5,6 +5,7 @@ Set-Location $root
 
 $args = @(
   "-m","PyInstaller","--noconfirm","--clean","--onedir","--noconsole","--name","IPTV-Shell",
+  "--icon","$root\assets\icon.ico",
   "--distpath","$root\builds\exe","--workpath","$root\builds\build","--specpath","$root\builds\build",
   "--add-data","$root\web;web",
   "--add-data","$root\providers;providers",
@@ -24,6 +25,11 @@ if (-not (Test-Path "$pkg\IPTV-Shell.exe")) { throw "打包失败：exe 没生�
 # （历史事故：升级解压覆盖，真 config 被默认 mock 盖掉，点播/分类全空）
 Copy-Item "$root\config.json" "$pkg\config.example.json" -Force
 Remove-Item "$pkg\config.json" -Force -ErrorAction SilentlyContinue
+
+# 桌面快捷方式的图标源：放一个独立 ico 在 exe 同级。
+# launch.py 建 .lnk 时把 IconLocation 指向它，避免 Windows 缓存 exe 图标导致重启后变白板。
+Copy-Item "$root\assets\icon.ico" "$pkg\IPTV外壳.ico" -Force
+if (-not (Test-Path "$pkg\IPTV外壳.ico")) { throw "打包失败：图标 ico 没复制进包" }
 
 # 先确认新代码真的在包里，再压 zip（防「拿旧包压出新 zip」的假成功）
 $srv = Get-Content "$pkg\_internal\server.py" -Raw -Encoding utf8
