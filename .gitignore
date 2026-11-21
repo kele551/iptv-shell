@@ -13,3 +13,4 @@ data/*.local.m3u
 data/*.local.xml
 *.local.m3u
 *.local.xml
+providers/yunnan_dx.py
