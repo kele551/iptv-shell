@@ -219,7 +219,7 @@ footer .r{margin-left:auto;color:var(--ink-4);font-size:var(--fs-xs)}
       <button class="btn quiet" id="copyTop">复制给智能体的一句话</button>
       <a class="btn quiet" href="https://github.com/kele551/iptv-shell" target="_blank" rel="noopener">看源码</a>
     </div>
-    <p class="lede" style="margin-top:var(--sp-200);font-size:var(--fs-sm)">下载的是 <b>Windows 免安装包</b>：解压到 D:\Program Files\IPTV外壳（没有就新建），桌面只留图标，双击 <b>IPTV-Shell.exe</b> 就能跑，<b>这台电脑不用装 Python</b>。只有走源码那条路才需要 Python 3.9+。</p>
+    <p class="lede" style="margin-top:var(--sp-200);font-size:var(--fs-sm)">下载的是 <b>Windows 免安装包</b>：解压到 D:\Program Files\IPTV外壳（没有就新建），双击 <b>IPTV-Shell.exe</b> 就能跑，<b>这台电脑不用装 Python</b>。只有走源码那条路才需要 Python 3.9+。</p>
     <div class="badges">
       <a href="https://github.com/kele551/iptv-shell/releases/latest" target="_blank" rel="noopener"><img alt="Downloads" src="https://img.shields.io/github/downloads/kele551/iptv-shell/total?style=flat-square&label=downloads&color=1f5fd0&x=1"></a>
       <a href="https://hits.sh/github.com/kele551/iptv-shell/" target="_blank" rel="noopener"><img alt="浏览量" src="https://hits.sh/github.com/kele551/iptv-shell.svg?label=views&color=1f5fd0" onerror="this.onerror=null;this.src='https://api.visitorbadge.io/api/visitors?path=kele551.iptv-shell&label=%E6%B5%8F%E8%A7%88%E9%87%8F&countColor=%231f5fd0&style=flat-square'"></a>
@@ -298,13 +298,13 @@ footer .r{margin-left:auto;color:var(--ink-4);font-size:var(--fs-xs)}
       <button class="cp" data-copy="#t-agent">复制</button>
       <pre id="t-agent">请帮我把这个 IPTV 外壳装到你这台电脑上，再接上这台电脑所在的网络。
 
-第 0 步先拿东西：如果这台电脑上已经有 IPTV 外壳的项目目录，就直接用；没有就从 https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip 下载免安装包（这个地址连不上就换 https://github.com/kele551/iptv-shell/releases/latest/download/iptv-shell-Windows.zip），解压到 D:\Program Files\IPTV外壳（没有就新建这个目录；别解压到桌面，桌面只留图标），会得到一个 IPTV-Shell 文件夹，里面的 IPTV-Shell.exe 双击就能跑，这台电脑不用装 Python。
+第 0 步先拿东西：如果这台电脑上已经有 IPTV 外壳的项目目录，就直接用；没有就从 https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip 下载免安装包（这个地址连不上就换 https://github.com/kele551/iptv-shell/releases/latest/download/iptv-shell-Windows.zip），解压到 D:\Program Files\IPTV外壳（没有就新建这个目录；别解压到桌面），会得到一个 IPTV-Shell 文件夹，里面的 IPTV-Shell.exe 双击就能跑，这台电脑不用装 Python。
 
 然后按这个顺序做：
 ① 跑 IPTV-Shell.exe probe（这个 exe 没有控制台窗口，输出会写到同一个文件夹里的「命令行输出.txt」；命令没返回就是还没跑完，返回后再打开那个文件读），把本机正在跑的服务、磁盘上的 m3u / m3u8 / xmltv 清单、已有的 IPTV 项目都列出来。这一步只是「找源」，别停下问我地址。
 ② 选一份能用的接进外壳：有清单就改 IPTV-Shell 文件夹里的 config.json，填 "provider": "m3u" 和 "m3u_path"（点播另填 "vod_m3u"）；包里只有 config.example.json，第一次运行会自动生成 config.json，没生成就把 config.example.json 复制一份改名。有服务才照 _internal\providers\转发示例.py 写适配器。
 ③ 跑 IPTV-Shell.exe check（命令返回后再看「命令行输出.txt」）。只有结论出「可以交」才算接好。check 会真的去拉视频分片、数播放器窗口，公网源分片太小或这台机器窗口检测受限时可能报 FAIL —— 遇到 FAIL 不要改成演示数据（mock）去凑「可以交」，更不要只说「成功了」；按原文把没过的项和卡点报给我。
-④ 最后正常启动一次程序（双击 IPTV-Shell.exe；命令行里用 start "" IPTV-Shell.exe）—— 桌面「IPTV外壳」图标只在这一步由程序自己创建，probe / check 这两个子命令不会建图标，所以这步不能省。以后双击图标就能看。文件夹本身别放桌面。
+④ 最后正常启动一次程序（双击 IPTV-Shell.exe；命令行里用 start "" IPTV-Shell.exe），确认台表能出来、点开能播，所以这步不能省。程序不会自动放桌面图标；要图标就自己右键 IPTV-Shell.exe → 发送到 → 桌面快捷方式。文件夹本身别放桌面。
 
 播放只用这台电脑上装好的播放器（mpv / VLC / PotPlayer 任一，Yaoplayer 按 mpv 算），不要内嵌网页播放器，也不要开机自启；点台、换台只许一个播放器窗口，已经在放就复用那个窗口切台，别每点一个台就新开一个播放器。要是这台宽带没开通 IPTV、探路也找不到任何清单，就直接告诉我「这条网络没有可用源」，别编假数据、别拿演示数据糊弄我。
 
@@ -337,7 +337,7 @@ python server.py --provider mock</pre>
   </div>
 
   <div class="pane" id="p-phone">
-    <p class="in-sub">手机上装不了：它要在这台电脑上起服务、改配置、装桌面图标。手机上能做的只有一件事——</p>
+    <p class="in-sub">手机上装不了：它要在这台电脑上起服务、改配置。手机上能做的只有一件事——</p>
     <div class="codebox">
       <button class="cp" data-copy="#t-phone">复制</button>
       <pre id="t-phone">把这个网址发到电脑上，让电脑上的 Agent 照页面里的「给 Agent 的一句话」做：
@@ -355,13 +355,13 @@ https://kele551.github.io/iptv-shell/</pre>
     <p>打开智能体对话框，整段粘过去，不用改字。</p>
     <textarea id="prompt" readonly>请帮我把这个 IPTV 外壳装到你这台电脑上，再接上这台电脑所在的网络。
 
-第 0 步先拿东西：如果这台电脑上已经有 IPTV 外壳的项目目录，就直接用；没有就从 https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip 下载免安装包（这个地址连不上就换 https://github.com/kele551/iptv-shell/releases/latest/download/iptv-shell-Windows.zip），解压到 D:\Program Files\IPTV外壳（没有就新建这个目录；别解压到桌面，桌面只留图标），会得到一个 IPTV-Shell 文件夹，里面的 IPTV-Shell.exe 双击就能跑，这台电脑不用装 Python。
+第 0 步先拿东西：如果这台电脑上已经有 IPTV 外壳的项目目录，就直接用；没有就从 https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip 下载免安装包（这个地址连不上就换 https://github.com/kele551/iptv-shell/releases/latest/download/iptv-shell-Windows.zip），解压到 D:\Program Files\IPTV外壳（没有就新建这个目录；别解压到桌面），会得到一个 IPTV-Shell 文件夹，里面的 IPTV-Shell.exe 双击就能跑，这台电脑不用装 Python。
 
 然后按这个顺序做：
 ① 跑 IPTV-Shell.exe probe（这个 exe 没有控制台窗口，输出会写到同一个文件夹里的「命令行输出.txt」；命令没返回就是还没跑完，返回后再打开那个文件读），把本机正在跑的服务、磁盘上的 m3u / m3u8 / xmltv 清单、已有的 IPTV 项目都列出来。这一步只是「找源」，别停下问我地址。
 ② 选一份能用的接进外壳：有清单就改 IPTV-Shell 文件夹里的 config.json，填 "provider": "m3u" 和 "m3u_path"（点播另填 "vod_m3u"）；包里只有 config.example.json，第一次运行会自动生成 config.json，没生成就把 config.example.json 复制一份改名。有服务才照 _internal\providers\转发示例.py 写适配器。
 ③ 跑 IPTV-Shell.exe check（命令返回后再看「命令行输出.txt」）。只有结论出「可以交」才算接好。check 会真的去拉视频分片、数播放器窗口，公网源分片太小或这台机器窗口检测受限时可能报 FAIL —— 遇到 FAIL 不要改成演示数据（mock）去凑「可以交」，更不要只说「成功了」；按原文把没过的项和卡点报给我。
-④ 最后正常启动一次程序（双击 IPTV-Shell.exe；命令行里用 start "" IPTV-Shell.exe）—— 桌面「IPTV外壳」图标只在这一步由程序自己创建，probe / check 这两个子命令不会建图标，所以这步不能省。以后双击图标就能看。文件夹本身别放桌面。
+④ 最后正常启动一次程序（双击 IPTV-Shell.exe；命令行里用 start "" IPTV-Shell.exe），确认台表能出来、点开能播，所以这步不能省。程序不会自动放桌面图标；要图标就自己右键 IPTV-Shell.exe → 发送到 → 桌面快捷方式。文件夹本身别放桌面。
 
 播放只用这台电脑上装好的播放器（mpv / VLC / PotPlayer 任一，Yaoplayer 按 mpv 算），不要内嵌网页播放器，也不要开机自启；点台、换台只许一个播放器窗口，已经在放就复用那个窗口切台，别每点一个台就新开一个播放器。要是这台宽带没开通 IPTV、探路也找不到任何清单，就直接告诉我「这条网络没有可用源」，别编假数据、别拿演示数据糊弄我。
 
@@ -378,7 +378,7 @@ https://kele551.github.io/iptv-shell/</pre>
     <tr><td><b>探路</b></td><td>扫本机在跑的服务、磁盘上的 m3u / xmltv、旧的 IPTV 项目，把能用的数据流列出来</td></tr>
     <tr><td><b>接入</b></td><td>有清单：改 <code>config.json</code>（<code>m3u_path</code> 直播、<code>vod_m3u</code> 点播）；有服务：照 <code>转发示例.py</code> 转发</td></tr>
     <tr><td><b>快检</b></td><td><code>tools\模板快检.py</code> 起临时端口把所有接口打一遍，必须出「可以交」，并把原始输出贴给你</td></tr>
-    <tr><td><b>交付</b></td><td>装桌面图标，双击确认台表能出来、点开能播；不通过就说清卡在哪一项</td></tr>
+    <tr><td><b>交付</b></td><td>双击确认台表能出来、点开能播；不通过就说清卡在哪一项</td></tr>
   </table>
 </div></section>
 
@@ -392,7 +392,7 @@ https://kele551.github.io/iptv-shell/</pre>
       <div class="a">模板不认宽带品牌，只认数据流。用你自己那条宽带抓的源就一样能用；
       别人家宽带的源播不了 —— 地址绑出口 IP、授权限本户，换网络直接 403。公开互联网上的公开 m3u 任何宽带都能播。</div></details>
     <details class="q"><summary>会开机自启吗？</summary>
-      <div class="a">不会。所有程序都是「点开才运行」：双击桌面图标才起服务，关掉窗口服务还在，再点回来。启动文件夹里什么都不放。</div></details>
+      <div class="a">不会。所有程序都是「点开才运行」：双击 IPTV-Shell.exe（或自己建的桌面图标）才起服务，关掉窗口服务还在，再点回来。启动文件夹里什么都不放。</div></details>
     <details class="q"><summary>必须装 mpv 吗？</summary>
       <div class="a">不必。外壳自己找本机播放器：mpv、VLC、PotPlayer 都认，也能在 <code>config.json</code> 的 <code>mpv</code> 列表里填任意播放器路径。
       一个都没有时页面会提示你先装一个（推荐 VLC，官网直装）。</div></details>

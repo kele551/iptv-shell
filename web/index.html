@@ -200,13 +200,13 @@ input:focus{border-color:var(--blue)}
     <p>整段粘进智能体对话框，它会自己在这台电脑上跑探路、找直播和点播数据流，接进外壳、跑快检、装到桌面。</p>
     <textarea id="aTxt" readonly>请帮我把这个 IPTV 外壳装到你这台电脑上，再接上这台电脑所在的网络。
 
-第 0 步先拿东西：如果这台电脑上已经有 IPTV 外壳的项目目录，就直接用；没有就从 https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip 下载免安装包（这个地址连不上就换 https://github.com/kele551/iptv-shell/releases/latest/download/iptv-shell-Windows.zip），解压到 D:\Program Files\IPTV外壳（没有就新建这个目录；别解压到桌面，桌面只留图标），会得到一个 IPTV-Shell 文件夹，里面的 IPTV-Shell.exe 双击就能跑，这台电脑不用装 Python。
+第 0 步先拿东西：如果这台电脑上已经有 IPTV 外壳的项目目录，就直接用；没有就从 https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip 下载免安装包（这个地址连不上就换 https://github.com/kele551/iptv-shell/releases/latest/download/iptv-shell-Windows.zip），解压到 D:\Program Files\IPTV外壳（没有就新建这个目录；别解压到桌面），会得到一个 IPTV-Shell 文件夹，里面的 IPTV-Shell.exe 双击就能跑，这台电脑不用装 Python。
 
 然后按这个顺序做：
 ① 跑 IPTV-Shell.exe probe（这个 exe 没有控制台窗口，输出会写到同一个文件夹里的「命令行输出.txt」；命令没返回就是还没跑完，返回后再打开那个文件读），把本机正在跑的服务、磁盘上的 m3u / m3u8 / xmltv 清单、已有的 IPTV 项目都列出来。这一步只是「找源」，别停下问我地址。
 ② 选一份能用的接进外壳：有清单就改 IPTV-Shell 文件夹里的 config.json，填 "provider": "m3u" 和 "m3u_path"（点播另填 "vod_m3u"）；包里只有 config.example.json，第一次运行会自动生成 config.json，没生成就把 config.example.json 复制一份改名。有服务才照 _internal\providers\转发示例.py 写适配器。
 ③ 跑 IPTV-Shell.exe check（命令返回后再看「命令行输出.txt」）。只有结论出「可以交」才算接好。check 会真的去拉视频分片、数播放器窗口，公网源分片太小或这台机器窗口检测受限时可能报 FAIL —— 遇到 FAIL 不要改成演示数据（mock）去凑「可以交」，更不要只说「成功了」；按原文把没过的项和卡点报给我。
-④ 最后正常启动一次程序（双击 IPTV-Shell.exe；命令行里用 start "" IPTV-Shell.exe）—— 桌面「IPTV外壳」图标只在这一步由程序自己创建，probe / check 这两个子命令不会建图标，所以这步不能省。以后双击图标就能看。文件夹本身别放桌面。
+④ 最后正常启动一次程序（双击 IPTV-Shell.exe；命令行里用 start "" IPTV-Shell.exe），确认台表能出来、点开能播，所以这步不能省。程序不会自动放桌面图标；要图标就自己右键 IPTV-Shell.exe → 发送到 → 桌面快捷方式。文件夹本身别放桌面。
 
 播放只用这台电脑上装好的播放器（mpv / VLC / PotPlayer 任一，Yaoplayer 按 mpv 算），不要内嵌网页播放器，也不要开机自启；点台、换台只许一个播放器窗口，已经在放就复用那个窗口切台，别每点一个台就新开一个播放器。要是这台宽带没开通 IPTV、探路也找不到任何清单，就直接告诉我「这条网络没有可用源」，别编假数据、别拿演示数据糊弄我。
 

@@ -387,7 +387,9 @@ def main():
         return _run_tool('模板快检.py', argv[1:])
 
     # 默认行为：起服务 + 服务通了自动开浏览器
-    _ensure_desktop_shortcut()
+    # 不在桌面自动放图标（2026-11-21 用户要求）：删掉的图标每次启动都被重建，
+    # 用户明确不要再冒出来。要图标就自己从安装目录右键 IPTV-Shell.exe 发送快捷方式。
+    # _ensure_desktop_shortcut()
     no_browser = '--no-browser' in argv
     port = 8905
     if '--port' in argv:

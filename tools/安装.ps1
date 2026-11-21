@@ -31,7 +31,7 @@ if ($Uninstall) {
   return
 }
 
-New-Lnk $lnkPath
-"桌面图标：$lnkPath"
-"双击图标才开始运行（不占开机自启）：约 3 秒弹出界面；关掉窗口服务还在，再点一次立刻回来"
-"撤掉：powershell -File tools\安装.ps1 -Uninstall -DesktopDir <同目录>"
+# 不再自动在桌面建图标（2026-11-21 用户要求）：之前删了又被重建，用户不要这个图标。
+# 需要图标时自己右键 IPTV-Shell.exe → 发送到 → 桌面快捷方式。
+"本脚本不再自动在桌面建图标。"
+"要开外壳：双击安装目录里的 IPTV-Shell.exe；要桌面图标：右键它 → 发送到 → 桌面快捷方式。"
