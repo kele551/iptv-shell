@@ -1,3 +1,35 @@
+<div align="center">
+<img src="docs/icon.png" alt="IPTV 外壳" height="120" width="120">
+
+<h1>IPTV 外壳</h1>
+
+<a href="https://github.com/kele551/iptv-shell" title="下载量 · 实时"><img alt="Downloads" src="https://img.shields.io/github/downloads/kele551/iptv-shell/total?style=flat-square&label=downloads&color=blue" height="30"></a>
+<a href="https://hits.sh/github.com/kele551/iptv-shell/" title="浏览量 · 实时"><img alt="浏览量" src="https://hits.sh/github.com/kele551/iptv-shell.svg?label=views&color=1f5fd0" height="30"></a>
+
+<a href="https://github.com/kele551/iptv-shell/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue?style=flat-square"></a>
+<img alt="Platform" src="https://img.shields.io/badge/platform-Windows-blue?style=flat-square">
+<img alt="Python" src="https://img.shields.io/badge/python-3.9%2B-blue?style=flat-square">
+<img alt="Last Commit" src="https://img.shields.io/github/last-commit/kele551/iptv-shell?style=flat-square&label=last%20commit&color=blue">
+
+<a href="https://github.com/kele551/iptv-shell/stargazers"><img alt="GitHub Star" src="https://img.shields.io/github/stars/kele551/iptv-shell?style=flat-square&logo=github&label=GitHub%20Star&color=gold"></a>
+<a href="https://github.com/kele551/iptv-shell/network/members"><img alt="GitHub Fork" src="https://img.shields.io/github/forks/kele551/iptv-shell?style=flat-square&label=GitHub%20Fork&color=blue"></a>
+<a href="https://github.com/kele551"><img alt="Follow Author" src="https://img.shields.io/github/followers/kele551?style=flat-square&logo=github&label=follow%20author&color=blue"></a>
+
+<img alt="Category" src="https://img.shields.io/badge/分类-应用软件-blue?style=flat-square">
+<img alt="Form" src="https://img.shields.io/badge/形态-本机网页外壳-blue?style=flat-square">
+<img alt="Free" src="https://img.shields.io/badge/费用-免费无广告-brightgreen?style=flat-square">
+<img alt="No Tracking" src="https://img.shields.io/badge/用户数据-不采集不上传-green?style=flat-square">
+
+<a href="https://github.com/kele551/iptv-shell"><img alt="Download" src="https://img.shields.io/badge/%F0%9F%93%A5_%E4%B8%8B%E8%BD%BD-GitHub-24292f?style=flat-square&logo=github&logoColor=white&labelColor=3d4552"></a>
+<a href="https://github.com/kele551/iptv-shell"><img alt="Source" src="https://img.shields.io/badge/%F0%9F%90%99_%E6%BA%90%E7%A0%81-GitHub-24292f?style=flat-square&logo=github&logoColor=white&labelColor=3d4552"></a>
+<a href="https://kele551.github.io/iptv-shell/"><img alt="Site" src="https://img.shields.io/badge/%F0%9F%8C%90_%E5%AE%98%E7%BD%91-IPTV%E5%A4%96%E5%A3%B3-1f5fd0?style=flat-square&labelColor=3d4552"></a>
+<a href="https://github.com/kele551/iptv-shell/issues"><img alt="Issues" src="https://img.shields.io/badge/%F0%9F%90%9E_%E5%8F%8D%E9%A6%88-%E6%8F%90Issue-0969da?style=flat-square&labelColor=3d4552"></a>
+
+<p>📺 <b>IPTV 外壳</b>　·　本机直播台表 + 三色节目单 + 点播海报墙，播放交给本机播放器</p>
+
+<p>作者 <b>海风（kele551）</b>　·　<a href="https://github.com/kele551/iptv-shell">GitHub</a>　·　<a href="https://kele551.github.io/iptv-shell/">官网</a></p>
+</div>
+
 # IPTV 外壳模板（通用版）
 
 一个只在本机跑的小服务：**直播列表 + 节目单三色 + 点播海报墙 + 详情卡 + 一键交本机播放器**。
