@@ -31,6 +31,22 @@ $chk = Get-Content "$pkg\_internal\tools\模板快检.py" -Raw -Encoding utf8
 if ($srv -notmatch "n.startswith\('yaoplayer'\)") { throw "包内 server.py 不是新版本" }
 if ($chk -notmatch "点播放真起播放器") { throw "包内 模板快检.py 不是新版本" }
 
+# 维护脚本不进对外包：发版前快检.py / 打包免安装包.ps1 只在本机维护时用，
+# 含 F:\Harness 绝对路径，打进用户包既无用处又泄露维护结构。
+# 用户/智能体用的 probe=探路.py、check=模板快检.py，都保留。
+Remove-Item "$pkg\_internal\tools\发版前快检.py" -Force -ErrorAction SilentlyContinue
+Remove-Item "$pkg\_internal\tools\打包免安装包.ps1" -Force -ErrorAction SilentlyContinue
+
+# 隐私闸门（2026-11-21）：包里不许夹带本机专属适配器 / 本机 Harness 路径 / 运营商私密字样。
+# 探路.py 里的 F:\桌面 / F:\文档 / F:\Download 是「找片源」的默认搜索位置，属功能设计，不在此拦。
+if (Test-Path "$pkg\_internal\providers\yunnan_dx.py") { throw "包内出现本机专属适配器 yunnan_dx.py，禁止打包" }
+$leak = Get-ChildItem "$pkg" -Recurse -File -Include *.py,*.md,*.json,*.html,*.txt |
+  Select-String -Pattern 'yunnan_dx|yunnan_svc|曲靖天邑|云南电信|云南IPTV|F:\\Harness' -ErrorAction SilentlyContinue
+if ($leak) {
+  $leak | ForEach-Object { Write-Host ("隐私命中: " + $_.Path + " :: " + $_.Line.Trim()) }
+  throw "包内发现本机路径 / 运营商私密字样，禁止打包"
+}
+
 $zip = "$root\builds\exe\iptv-shell-Windows.zip"
 Remove-Item $zip -Force -ErrorAction SilentlyContinue
 Compress-Archive -Path "$pkg", "$root\builds\exe\使用说明.txt", "$root\builds\exe\IPTV外壳.cmd" -DestinationPath $zip -CompressionLevel Optimal

@@ -75,7 +75,7 @@ def channels():
 
     认三种写法（有哪个用哪个，别让用户为了一个字段去改外部服务）：
       1. 服务自己就 export 了 channels()
-      2. ensure_fresh() 给地址表 + load_meta() 给名字/分组（曲靖那套就是这个）
+      2. ensure_fresh() 给地址表 + load_meta() 给名字/分组（某运营商线路就是这样）
       3. rows() 之类返回 [{code,name,group,num}]
     """
     s = _svc()
