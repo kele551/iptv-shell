@@ -3,6 +3,11 @@
 
 <h1>IPTV 外壳</h1>
 
+<p><a href="https://kele551.github.io/iptv-shell/"><img alt="打开官网 · 图文安装说明" src="https://img.shields.io/badge/%F0%9F%91%89_%E6%89%93%E5%BC%80%E5%AE%98%E7%BD%91-%E5%9B%BE%E6%96%87%E5%AE%89%E8%A3%85%E8%AF%B4%E6%98%8E-1f5fd0?style=for-the-badge"></a></p>
+
+<p><b>第一次来，先打开官网</b>：<a href="https://kele551.github.io/iptv-shell/">https://kele551.github.io/iptv-shell/</a><br>
+官网有截图、三种安装方式，还能一键复制「给智能体的一句话」，比在 README 里翻更快。</p>
+
 <a href="https://github.com/kele551/iptv-shell/releases/latest" title="下载量 · 实时"><img alt="Downloads" src="https://img.shields.io/github/downloads/kele551/iptv-shell/total?style=flat-square&label=downloads&color=blue&x=1" height="30"></a>
 <a href="https://hits.sh/github.com/kele551/iptv-shell/" title="浏览量 · 实时"><img alt="浏览量" src="https://hits.sh/github.com/kele551/iptv-shell.svg?label=views&color=1f5fd0" height="30"></a>
 
@@ -200,4 +205,5 @@ python tools\模板快检.py --provider m3u
 ## 许可
 
 MIT，见 `LICENSE`。
+
 
