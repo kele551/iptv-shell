@@ -29,6 +29,7 @@
 <a href="https://github.com/kele551/iptv-shell"><img alt="Source" src="https://img.shields.io/badge/%F0%9F%90%99_%E6%BA%90%E7%A0%81-GitHub-24292f?style=flat-square&logo=github&logoColor=white&labelColor=3d4552"></a>
 <a href="https://kele551.github.io/iptv-shell/"><img alt="Site" src="https://img.shields.io/badge/%F0%9F%8C%90_%E5%AE%98%E7%BD%91-IPTV%E5%A4%96%E5%A3%B3-1f5fd0?style=flat-square&labelColor=3d4552"></a>
 <a href="https://github.com/kele551/iptv-shell/issues"><img alt="Issues" src="https://img.shields.io/badge/%F0%9F%90%9E_%E5%8F%8D%E9%A6%88-%E6%8F%90Issue-0969da?style=flat-square&labelColor=3d4552"></a>
+<a href="#sponsor"><img alt="Sponsor" src="https://img.shields.io/badge/%E2%98%95_%E8%B5%9E%E8%B5%8F-%E8%AF%B7%E5%96%9D%E5%92%96%E5%95%A1-ff69b4?style=flat-square&labelColor=3d4552"></a>
 
 <p>📺 <b>IPTV 外壳</b>　·　本机直播台表 + 三色节目单 + 点播海报墙，播放交给本机播放器</p>
 
@@ -216,8 +217,28 @@ python tools\模板快检.py --provider m3u
 
 ---
 
+<a id="sponsor"></a>
+
+## 支持项目
+
+如果 **IPTV 外壳** 帮你把台表和点播收拾利索了，**给仓库点个 Star ⭐** 就是最好的支持 —— 它能让更多人看到这个项目。
+
+想再进一步，请作者喝杯咖啡（**完全自愿，不影响任何功能**）：
+
+<p align="center">
+  <img src="docs/qr-sponsor.png" alt="海风的微信赞赏码" width="260">
+  <br>
+  <sub>微信扫一扫 · 金额随缘</sub>
+</p>
+
+> 本项目以 MIT 协议自由开源，**没有付费版、也没有付费功能**；捐赠纯属自愿，
+> 与功能开放、版本更新、Issue 响应**没有任何关系**。
+
+---
+
 ## 许可
 
 MIT，见 `LICENSE`。
+
 
 
