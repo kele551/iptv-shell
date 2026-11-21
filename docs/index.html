@@ -192,15 +192,17 @@ footer .r{margin-left:auto;color:#9aa0a8;font-size:13px}
 
 <section class="hero"><div class="wrap"><div class="grid">
   <div>
-    <span class="eyebrow">● 只在本机跑 · MIT 开源 · 不需要任何依赖</span>
+    <span class="eyebrow">● 只在本机跑 · MIT 开源 · 免安装包不用装 Python</span>
     <h1>把你家的直播和点播，<br><span>装进一个安静的界面。</span></h1>
     <p class="lede">台表、三色节目单、点播海报墙、详情卡都在；播放交给<b>你已经装好的播放器</b>（mpv / VLC / PotPlayer）。
       <b>不做开机自启</b>，点开才运行。</p>
     <div class="acts">
-      <a class="btn pri" href="#install">三步用起来</a>
+      <a class="btn pri" href="download/iptv-shell-Windows.zip">⬇ 下载免安装包 · 8.4 MB</a>
+      <a class="btn" href="https://github.com/kele551/iptv-shell/releases/download/v1.0/iptv-shell-Windows.zip" target="_blank" rel="noopener">备用下载</a>
       <button class="btn" id="copyTop">复制给智能体的一句话</button>
       <a class="btn" href="https://github.com/kele551/iptv-shell" target="_blank" rel="noopener">看源码</a>
     </div>
+    <p class="lede" style="margin-top:14px;font-size:14px">下载的是 <b>Windows 免安装包</b>：解压到桌面，双击 <b>IPTV-Shell.exe</b> 就能跑，<b>这台电脑不用装 Python</b>。只有走源码那条路才需要 Python 3.9+。</p>
     <div class="badges">
       <a href="https://github.com/kele551/iptv-shell/releases/latest" target="_blank" rel="noopener"><img alt="Downloads" src="https://img.shields.io/github/downloads/kele551/iptv-shell/total?style=flat-square&label=downloads&color=1f5fd0&x=1"></a>
       <a href="https://hits.sh/github.com/kele551/iptv-shell/" target="_blank" rel="noopener"><img alt="浏览量" src="https://hits.sh/github.com/kele551/iptv-shell.svg?label=views&color=1f5fd0" onerror="this.onerror=null;this.src='https://api.visitorbadge.io/api/visitors?path=kele551.iptv-shell&label=%E6%B5%8F%E8%A7%88%E9%87%8F&countColor=%231f5fd0&style=flat-square'"></a>
@@ -255,7 +257,7 @@ footer .r{margin-left:auto;color:#9aa0a8;font-size:13px}
 
 <section class="install" id="install"><div class="wrap">
   <div class="in-head"><h2 style="margin:0">选一种方式安装</h2></div>
-  <p class="in-sub">不用编译、不用装运行库。Windows 上装个 Python 3.9 以上就行。</p>
+  <p class="in-sub">不用编译、不用装运行库。免安装包连 Python 都不用装，解压双击就能跑。</p>
 
   <div class="tabs2" id="itabs">
     <button class="on" data-p="agent">交给 Agent</button>
@@ -277,14 +279,20 @@ footer .r{margin-left:auto;color:#9aa0a8;font-size:13px}
     <p class="in-note">手机上的对话只会给你步骤，不能动手；要在电脑上跑命令的那种。</p>
     <div class="codebox">
       <button class="cp" data-copy="#t-agent">复制</button>
-      <pre id="t-agent">请帮我把这个 IPTV 外壳接到你这台电脑所在的网络上：先读项目里的 README.md 和 智能体接入指南.md，然后跑 python tools\探路.py，把本机正在跑的服务、磁盘里的 m3u / m3u8 / xmltv 清单、已有的 IPTV 项目都列出来，选一份能用的接进外壳（填 config.json，或照 providers\转发示例.py 写一个适配器），跑到 tools\模板快检.py 出「可以交」，再跑 tools\安装.ps1 装到桌面，双击就能看。播放只用这台电脑上装好的播放器（mpv / VLC / PotPlayer 任一），不要内嵌网页播放器，也不要开机自启。要是这台宽带没开通 IPTV、探路也找不到任何清单，就直接告诉我「这条网络没有可用源」，别编假数据、别拿演示数据糊弄我。
+      <pre id="t-agent">请帮我把这个 IPTV 外壳装到你这台电脑上，再接上这台电脑所在的网络。
 
-不要把步骤列给我，你自己在这台电脑上执行。最后把 模板快检 的原始输出贴给我，不要只说「成功了」；没通过就说清哪一项没过、卡在哪。</pre>
+第 0 步先拿东西：如果这台电脑上已经有 IPTV 外壳的项目目录，就直接用；没有就从 https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip 下载免安装包（这个地址连不上就换 https://github.com/kele551/iptv-shell/releases/download/v1.0/iptv-shell-Windows.zip），解压到桌面，会得到一个 IPTV-Shell 文件夹，里面的 IPTV-Shell.exe 双击就能跑，这台电脑不用装 Python。
+
+然后按这个顺序做：跑 IPTV-Shell.exe probe，把本机正在跑的服务、磁盘里的 m3u / m3u8 / xmltv 清单、已有的 IPTV 项目都列出来；选一份能用的接进外壳（改 IPTV-Shell 文件夹里的 config.json，或照 _internal\providers\转发示例.py 写一个适配器）；跑 IPTV-Shell.exe check，出「可以交」才算接好。想放到桌面就保持 IPTV-Shell 文件夹在桌面，以后双击 IPTV-Shell.exe 就能看。
+
+播放只用这台电脑上装好的播放器（mpv / VLC / PotPlayer 任一），不要内嵌网页播放器，也不要开机自启。要是这台宽带没开通 IPTV、探路也找不到任何清单，就直接告诉我「这条网络没有可用源」，别编假数据、别拿演示数据糊弄我。
+
+不要把步骤列给我，你自己在这台电脑上执行。最后把 check 的原始输出贴给我，不要只说「成功了」；没通过就说清哪一项没过、卡在哪。</pre>
     </div>
   </div>
 
   <div class="pane" id="p-cmd">
-    <p class="in-sub">装了 git 和 Python 的话，一条命令把它拉下来并跑起来（先看演示线路）：</p>
+    <p class="in-sub">这条路要 Python 3.9+（免安装包不用）。装了 git 和 Python 的话，一条命令把它拉下来并跑起来（先看演示线路）：</p>
     <div class="codebox">
       <button class="cp" data-copy="#t-cmd">复制</button>
       <pre id="t-cmd">git clone https://github.com/kele551/iptv-shell.git
@@ -296,12 +304,13 @@ python server.py --provider mock</pre>
 
   <div class="pane" id="p-manual">
     <div class="steps2">
-      <div class="s2"><span>1</span><div><b>下载并解压</b><br>拿到 <code>iptv-shell-v1.0.zip</code>，解压到任意目录；不要放太深的中文路径。</div></div>
-      <div class="s2"><span>2</span><div><b>接入你的线路</b><br>打开 <code>config.json</code>：<code>m3u_path</code> 指直播清单，<code>vod_m3u</code> 指点播清单；没有点播就留空，页签照样在。</div></div>
-      <div class="s2"><span>3</span><div><b>双击桌面图标</b><br>跑 <code>tools\安装.vbs</code> 生成图标；双击才启动，关掉窗口服务还在，再点就回来。</div></div>
+      <div class="s2"><span>1</span><div><b>下载并解压</b><br>拿到 <code>iptv-shell-Windows.zip</code>，解压到桌面（会得到 <code>IPTV-Shell</code> 文件夹）；不要放太深的中文路径。</div></div>
+      <div class="s2"><span>2</span><div><b>接入你的线路</b><br>打开文件夹里的 <code>config.json</code>：<code>m3u_path</code> 指直播清单，<code>vod_m3u</code> 指点播清单；没有点播就留空，页签照样在。</div></div>
+      <div class="s2"><span>3</span><div><b>双击 IPTV-Shell.exe</b><br>静默起服务并打开浏览器，直接就是台表；关掉窗口服务还在，再点就回来。不需要装 Python。</div></div>
     </div>
     <div class="row" style="margin-top:20px">
-      <a class="btn" href="https://github.com/kele551/iptv-shell/releases/latest" target="_blank" rel="noopener">下载 zip</a>
+      <a class="btn" href="download/iptv-shell-Windows.zip">下载免安装包</a>
+      <a class="btn" href="https://github.com/kele551/iptv-shell/releases/download/v1.0/iptv-shell-Windows.zip" target="_blank" rel="noopener">GitHub 备用地址</a>
       <a class="btn" href="https://github.com/kele551/iptv-shell/blob/main/README.md" target="_blank" rel="noopener">看完整说明</a>
     </div>
   </div>
@@ -323,8 +332,15 @@ https://kele551.github.io/iptv-shell/</pre>
   <div class="agentbox">
     <h3>复制这一句给你的智能体</h3>
     <p>打开智能体对话框，整段粘过去，不用改字。</p>
-    <textarea id="prompt" readonly>请帮我把这个 IPTV 外壳接到你这台电脑所在的网络上：先读项目里的 README.md 和 智能体接入指南.md，然后跑 python tools\探路.py，把本机正在跑的服务、磁盘里的 m3u / m3u8 / xmltv 清单、已有的 IPTV 项目都列出来，选一份能用的接进外壳（填 config.json，或照 providers\转发示例.py 写一个适配器），跑到 tools\模板快检.py 出「可以交」，再跑 tools\安装.ps1 装到桌面，双击就能看。播放只用这台电脑上装好的播放器（mpv / VLC / PotPlayer 任一），不要内嵌网页播放器，也不要开机自启。要是这台宽带没开通 IPTV、探路也找不到任何清单，就直接告诉我「这条网络没有可用源」，别编假数据、别拿演示数据糊弄我。
-不要把步骤列给我，你自己在这台电脑上执行。最后把 模板快检 的原始输出贴给我，不要只说「成功了」；没通过就说清哪一项没过、卡在哪。</textarea>
+    <textarea id="prompt" readonly>请帮我把这个 IPTV 外壳装到你这台电脑上，再接上这台电脑所在的网络。
+
+第 0 步先拿东西：如果这台电脑上已经有 IPTV 外壳的项目目录，就直接用；没有就从 https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip 下载免安装包（这个地址连不上就换 https://github.com/kele551/iptv-shell/releases/download/v1.0/iptv-shell-Windows.zip），解压到桌面，会得到一个 IPTV-Shell 文件夹，里面的 IPTV-Shell.exe 双击就能跑，这台电脑不用装 Python。
+
+然后按这个顺序做：跑 IPTV-Shell.exe probe，把本机正在跑的服务、磁盘里的 m3u / m3u8 / xmltv 清单、已有的 IPTV 项目都列出来；选一份能用的接进外壳（改 IPTV-Shell 文件夹里的 config.json，或照 _internal\providers\转发示例.py 写一个适配器）；跑 IPTV-Shell.exe check，出「可以交」才算接好。想放到桌面就保持 IPTV-Shell 文件夹在桌面，以后双击 IPTV-Shell.exe 就能看。
+
+播放只用这台电脑上装好的播放器（mpv / VLC / PotPlayer 任一），不要内嵌网页播放器，也不要开机自启。要是这台宽带没开通 IPTV、探路也找不到任何清单，就直接告诉我「这条网络没有可用源」，别编假数据、别拿演示数据糊弄我。
+
+不要把步骤列给我，你自己在这台电脑上执行。最后把 check 的原始输出贴给我，不要只说「成功了」；没通过就说清哪一项没过、卡在哪。</textarea>
     <div class="row">
       <button class="btn pri" id="copyBtn">复制这一段</button>
       <span class="hint">粘完它会自己跑：探路 → 改配置 → 快检 → 装桌面。</span>
