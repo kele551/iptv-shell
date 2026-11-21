@@ -23,23 +23,88 @@ import re
 import shutil
 import socket
 import subprocess
+import sys
 import threading
 import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-BASE = os.path.dirname(os.path.abspath(__file__))
-CONFIG_PATH = os.path.join(BASE, 'config.json')
+def _resolve_base():
+    """资源根：web/ providers/ data/ tools/ 所在目录。
+
+    免安装 exe（PyInstaller onefile）运行时，先找 exe 同级目录（要有 web/ 与
+    providers/ 才算完整），这样用户可以把线路文件放在 exe 旁边直接换；
+    同级不完整才退回包内解压出来的 _MEIPASS。源码态就是本文件所在目录。
+    """
+    env = os.environ.get('IPTV_BASE')
+    if env and os.path.isdir(env):
+        return os.path.abspath(env)
+    if getattr(sys, 'frozen', False):
+        exe_dir = os.path.dirname(os.path.abspath(sys.executable))
+        has_web = os.path.isdir(os.path.join(exe_dir, 'web'))
+        has_prov = os.path.isdir(os.path.join(exe_dir, 'providers'))
+        if has_web and has_prov:
+            return exe_dir
+        return getattr(sys, '_MEIPASS', exe_dir)
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+def _resolve_config(base):
+    """配置：exe 同级放 config.json 就优先用它（换线路 / 换端口不用重新打包）"""
+    if getattr(sys, 'frozen', False):
+        side = os.path.join(os.path.dirname(os.path.abspath(sys.executable)), 'config.json')
+        if os.path.isfile(side):
+            return side
+    env = os.environ.get('IPTV_CONFIG')
+    if env and os.path.isfile(env):
+        return os.path.abspath(env)
+    return os.path.join(base, 'config.json')
+
+
+BASE = _resolve_base()
+CONFIG_PATH = _resolve_config(BASE)
 WEB_DIR = os.path.join(BASE, 'web')
 
 START_TS = time.time()
 
 # 站内小图标（32x32），省得浏览器每次白拿一个 404
 FAVICON_PNG = base64.b64decode(
-    'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAtklEQVR42mNkQANCGi7/GWgI3t3Yw4jM'
-    'Z6Kn5djsYKKn5djsYqK35eiOYBwIy3GmgVEHDARgwSWhUTGPqhbd6EgiPgSobTk+M4dmGtgYKjvwiXB'
-    'jqCxVHEJxFFDqEKqlAXIdQvVESKpDWKjtAP/Vj6lTENHaYqo5gFyLKXYApRZTlAipZfngLYpx1Vy0qA1'
-    'Hm2SjDhh4B6D31egJ3t3Yw8iErcNIL8tRooCejkC2iwlf15ke3XMAKiVA1FwgEm8AAAAASUVORK5CYII=')
+    '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'
+    '8H58iFWO5/8Dp3Au5Ale2wEAAAAASUVORK5CYII='
+)
 
 # ---------------------------------------------------------------- 配置
 
