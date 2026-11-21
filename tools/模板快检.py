@@ -153,14 +153,13 @@ def safe_json(body, default=None):
         return default if default is not None else {}
 
 
-def _player_pids(port):
-    """列出「命令行里带本机这个端口」的播放器进程 —— 用来判断点了以后到底起没起
-    （只认播放器名 + 端口，不会误伤用户自己打开的窗口）
-    非 mpv 播放器喂的是「正在播放-<台名>.m3u」，命令行里没有端口，按文件名也认"""
+def _player_pids(tag):
+    """列出「命令行里带本次快检标记」的播放器进程 —— 用来判断点了以后到底起没起
+    （只认播放器名 + 本次专用管道名，不会误伤用户自己打开的窗口，也不会把
+      正在跑着的正式外壳那个窗口算进来）"""
     ps = ("Get-CimInstance Win32_Process | Where-Object { $_.Name -match"
-          " 'mpv|vlc|PotPlayer|Yaoplayer' -and ($_.CommandLine -like"
-          " '*127.0.0.1:%d*' -or $_.CommandLine -like '*正在播放-*') } |"
-          " Select-Object -ExpandProperty ProcessId") % port
+          " 'mpv|vlc|PotPlayer|Yaoplayer' -and $_.CommandLine -like"
+          " '*%s*' } | Select-Object -ExpandProperty ProcessId") % tag
     exe = os.path.join(os.environ.get('SystemRoot', r'C:\Windows'),
                        'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe')
     try:
@@ -206,6 +205,26 @@ def _window_titles(pids):
         return []
 
 
+def _player_windows(tag):
+    """真正数「窗口」：Yaoplayer 是外壳+内核两个进程，只该有 1 个窗口。
+    用户说的「跳出两个播放器」就是两个窗口，不是两个进程。"""
+    ps = ("Get-CimInstance Win32_Process | Where-Object { $_.Name -match"
+          " 'mpv|vlc|PotPlayer|Yaoplayer' -and $_.CommandLine -like"
+          " '*%s*' } |"
+          " ForEach-Object { $p = Get-Process -Id $_.ProcessId -ErrorAction SilentlyContinue;"
+          " if ($p -and $p.MainWindowHandle -ne 0) { $p.MainWindowTitle } }") % tag
+    exe = os.path.join(os.environ.get('SystemRoot', r'C:\Windows'),
+                       'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe')
+    try:
+        out = subprocess.run([exe, '-NoProfile', '-Command', ps],
+                             capture_output=True, timeout=25,
+                             creationflags=0x08000000)
+        return [x.strip() for x in (out.stdout or b'').decode('utf-8', 'ignore').splitlines()
+                if x.strip()]
+    except Exception:
+        return []
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--provider', default=None)
@@ -232,9 +251,20 @@ def main():
     print('模板快检：线路=%s 端口=%d' % (prov, port))
     print('          配置=%s' % (cfg_file or '没找到 config.json，按演示线路跑'))
     log = os.path.join(os.environ.get('TEMP') or '/tmp', 'iptv_shell_check.log')
+    tag = 'iptv-check-%d' % port      # 本次快检专用标记（管道名 + 进程命令行都带它）
     env = dict(os.environ)
     if cfg_file:
-        env['IPTV_CONFIG'] = cfg_file
+        # 用临时配置跑：端口、管道都换成本次专用的，绝不去抢用户正在用的那个外壳
+        try:
+            c2 = dict(cfg)
+            c2['port'] = port
+            c2['mpv_pipe'] = '\\\\.\\pipe\\' + tag
+            tcfg = os.path.join(os.environ.get('TEMP') or '/tmp', 'iptv_check_cfg_%d.json' % port)
+            with open(tcfg, 'w', encoding='utf-8') as f:
+                json.dump(c2, f, ensure_ascii=False, indent=2)
+            env['IPTV_CONFIG'] = tcfg
+        except Exception:
+            env['IPTV_CONFIG'] = cfg_file
     proc = subprocess.Popen([PY, SERVER, '--port', str(port), '--provider', prov],
                             cwd=HERE, env=env, stdout=open(log, 'w', encoding='utf-8'),
                             stderr=subprocess.STDOUT)
@@ -401,14 +431,19 @@ def main():
         # --- 点播放：接口回 ok 不算数，播放器进程必须真的起来
         # （历史坑：Yaoplayer 被当成 mpv 塞了 --input-ipc-server，静默退出，
         #   接口照样回 ok，用户看到的是「点了没反应」）
-        first = None
+        first = second = None
         for g in groups:
             items = g.get('items') or []
-            if items:
-                first = items[0]
+            for it in items:
+                if not first:
+                    first = it
+                elif not second:
+                    second = it
+                    break
+            if second:
                 break
         if prov != 'mock' and first and _any_player():
-            before = set(_player_pids(port))
+            before = set(_player_pids(tag))
             st, body, _ = get(base + '/play?u=/ch/%s.m3u8&t=%s'
                               % (first['code'],
                                  urllib.parse.quote(first.get('name') or '')))
@@ -416,15 +451,33 @@ def main():
             new = []
             for _ in range(12):
                 time.sleep(0.5)
-                new = [x for x in _player_pids(port) if x not in before]
+                new = [x for x in _player_pids(tag) if x not in before]
                 if new:
                     break
             if new:
-                time.sleep(1.5)
-                titles = _window_titles(new)
-                say(True, '点播放真起播放器',
-                    '起来了 %d 个进程 / 窗口标题：%s'
-                    % (len(new), '、'.join(titles) if titles else '（暂无窗口标题）'))
+                time.sleep(2)
+                wins = _player_windows(tag)
+                if wins:
+                    say(True, '点播放真起播放器',
+                        '窗口 %d 个 / 标题：%s' % (len(wins), '、'.join(wins)))
+                else:
+                    say(False, '点播放只起进程没窗口',
+                        '进程 %d 个但一个窗口都没有，用户会以为点了没反应' % len(new))
+                # 单窗口闸门：再点第二个台，播放器只许有一个窗口
+                if second:
+                    get(base + '/play?u=/ch/%s.m3u8&t=%s'
+                        % (second['code'],
+                           urllib.parse.quote(second.get('name') or '')))
+                    time.sleep(4)
+                    w2 = _player_windows(tag)
+                    if len(w2) <= 1:
+                        say(True, '换台只留一个窗口',
+                            '连点两个台，播放器窗口还是 %d 个：%s'
+                            % (len(w2), '、'.join(w2) or '（暂无标题）'))
+                    else:
+                        say(False, '换台跳出两个播放器',
+                            '连点两个台后变成 %d 个窗口：%s'
+                            % (len(w2), '、'.join(w2)))
                 _kill_pids(new)
             else:
                 say(False, '点播放没起播放器',

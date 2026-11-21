@@ -161,12 +161,15 @@ def check_upgrade():
     try:
         with zipfile.ZipFile(ZIP) as z:
             names = set(z.namelist())
-            need = ["IPTV-Shell/IPTV-Shell.exe", "IPTV-Shell/config.json",
+            need = ["IPTV-Shell/IPTV-Shell.exe", "IPTV-Shell/config.example.json",
                     "IPTV-Shell/_internal/server.py",
                     "IPTV-Shell/_internal/providers/_meta.py",
                     "IPTV-Shell/_internal/web/index.html",
                     "使用说明.txt"]
             missing = [n for n in need if n not in names]
+            # 包里不许带 config.json：带了就会在覆盖安装时把用户的线路配置冲掉
+            if "IPTV-Shell/config.json" in names:
+                missing.append("包里不该有 IPTV-Shell/config.json（会冲掉用户配置）")
             ok = not missing
             detail = "缺 %s" % missing if missing else "%d 个文件，%.1f MB" % (
                 len(names), os.path.getsize(ZIP) / 1048576)

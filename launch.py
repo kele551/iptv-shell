@@ -158,6 +158,15 @@ os.environ['IPTV_BASE'] = BASE
 if getattr(sys, 'frozen', False):
     _exe_dir = os.path.dirname(os.path.abspath(sys.executable))
     _ext_cfg = os.path.join(_exe_dir, 'config.json')
+    # 第一次装：包里只有 config.example.json，自动复制成可编辑的 config.json。
+    # 升级覆盖时包里不带 config.json，用户现有配置（线路/端口/播放器）就不会被冲掉。
+    _example = os.path.join(_exe_dir, 'config.example.json')
+    if not os.path.isfile(_ext_cfg) and os.path.isfile(_example):
+        try:
+            import shutil as _shutil
+            _shutil.copyfile(_example, _ext_cfg)
+        except Exception:
+            pass
     if os.path.isfile(_ext_cfg) and os.path.abspath(_exe_dir) != os.path.abspath(BASE):
         try:
             import shutil as _shutil

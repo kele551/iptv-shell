@@ -432,13 +432,10 @@ def build_vod_m3u(host, cat=None):
 
 def _player_kind(exe):
     n = os.path.basename(exe or '').lower()
-    # Yaoplayer / mpv-Atmos 这类「MPV 套壳」不接受 mpv 的 --input-ipc-server /
-    # --no-terminal / --force-window，硬塞会静默退出（点了没窗口）。只把真正的
-    # mpv 当 mpv，套壳一律按「直接喂地址」处理。
-    if n.startswith('mpv') and not n.startswith('mpv-'):
+    # Yaoplayer / mpv-Atmos 都是 MPV 套壳，实测吃 --input-ipc-server / --force-window /
+    # --keep-open，所以一起当 mpv 处理：同一个窗口靠管道换台，绝不连开两个。
+    if n.startswith('mpv') or n.startswith('yaoplayer'):
         return 'mpv'
-    if n.startswith('yaoplayer') or n.startswith('mpv-'):
-        return 'other'
     if n.startswith('vlc'):
         return 'vlc'
     if 'potplayer' in n:
@@ -483,7 +480,41 @@ def _mpv_pipe_cmd(obj):
 
 
 _mpv_lock = threading.Lock()
-_mpv = {'url': ''}
+_mpv = {'url': '', 'pid': 0, 'exe': ''}
+
+
+def _ours_alive():
+    """本服务起的那个播放器还活着吗（只认自己记下的 PID，不碰用户自己开的）"""
+    pid = _mpv.get('pid')
+    if not pid:
+        return False
+    try:
+        r = subprocess.run(['C:\\Windows\\System32\\tasklist.exe', '/FI', 'PID eq %d' % pid,
+                            '/FO', 'CSV', '/NH'], capture_output=True, text=True, timeout=10,
+                           creationflags=0x08000000)
+        return ('"%d"' % pid) in (r.stdout or '')
+    except Exception:
+        return False
+
+
+def _kill_ours():
+    pid = _mpv.get('pid')
+    if pid:
+        try:
+            subprocess.run(['C:\\Windows\\System32\\taskkill.exe', '/PID', str(pid), '/T', '/F'],
+                           capture_output=True, timeout=10, creationflags=0x08000000)
+        except Exception:
+            pass
+    _mpv['pid'] = 0
+    _mpv['url'] = ''
+
+
+def _spawn(exe, args):
+    p = subprocess.Popen(args, close_fds=True,
+                         creationflags=0x08000000 if os.name == 'nt' else 0)
+    _mpv['pid'] = p.pid
+    _mpv['exe'] = exe
+    return p
 
 
 def _title_playlist(url, title):
@@ -531,24 +562,29 @@ def mpv_play(url, title=''):
     kind = _player_kind(exe)
     with _mpv_lock:
         try:
-            if kind == 'mpv' and _mpv['url'] and _mpv_pipe_cmd({'command': ['loadfile', url]}):
-                if title:
-                    _mpv_pipe_cmd({'command': ['set_property', 'title', title]})
-                _mpv['url'] = url
-                return True, ''
+            # 不管哪种播放器，都只留一个窗口：能复用的复用，不能复用的先关自己那个
+            src = _title_playlist(url, title) if title else url
             if kind == 'mpv':
-                _kill_stray()
-                args = [exe, url, '--force-window=yes', '--keep-open=yes',
+                if _ours_alive() and _mpv_pipe_cmd({'command': ['loadfile', src or url]}):
+                    if title:
+                        _mpv_pipe_cmd({'command': ['set_property', 'title', title]})
+                    _mpv['url'] = url
+                    return True, ''
+                _kill_ours()
+                args = [src or url, '--force-window=yes', '--keep-open=yes',
                         '--input-ipc-server=' + CFG['mpv_pipe'], '--no-terminal']
                 if title:
                     args.append('--title=' + title)
+                p = _spawn(exe, [exe] + args)
+                time.sleep(1.3)
+                if p.poll() is not None:
+                    # 这版播放器不吃那套参数：退回「只喂清单」，照样一个窗口
+                    _spawn(exe, [exe, src or url])
             else:
-                # VLC / PotPlayer / Yaoplayer / 其它：给一个带台名的小清单，
-                # 窗口标题就是台名（直接喂地址只会显示频道编号）
-                src = _title_playlist(url, title) or url
-                args = [exe, src]
-            subprocess.Popen(args, close_fds=True,
-                             creationflags=0x08000000 if os.name == 'nt' else 0)
+                # VLC / PotPlayer 等：先关掉自己上次开的，再开新的，永远只一个
+                _kill_ours()
+                _kill_stray()
+                _spawn(exe, [exe, src or url])
             _mpv['url'] = url if kind == 'mpv' else ''
             return True, ''
         except Exception as e:
