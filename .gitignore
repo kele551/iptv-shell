@@ -14,3 +14,4 @@ data/*.local.xml
 *.local.m3u
 *.local.xml
 providers/yunnan_dx.py
+!docs/icon.png
