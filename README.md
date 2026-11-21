@@ -6,7 +6,7 @@
 <p><a href="https://kele551.github.io/iptv-shell/"><img alt="打开官网 · 图文安装说明" src="https://img.shields.io/badge/%F0%9F%91%89_%E6%89%93%E5%BC%80%E5%AE%98%E7%BD%91-%E5%9B%BE%E6%96%87%E5%AE%89%E8%A3%85%E8%AF%B4%E6%98%8E-1f5fd0?style=for-the-badge"></a></p>
 
 <p><b>先拿东西</b>：<a href="https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip"><b>⬇ 免安装包 · Windows（8.4 MB，这台电脑不用装 Python）</b></a><br>
-备用下载：<a href="https://github.com/kele551/iptv-shell/releases/download/v1.0/iptv-shell-Windows.zip">GitHub Release 同一份文件</a>　|　<a href="https://github.com/kele551/iptv-shell/archive/refs/heads/main.zip">源码 zip（这条路要 Python 3.9+）</a></p>
+备用下载：<a href="https://github.com/kele551/iptv-shell/releases/latest/download/iptv-shell-Windows.zip">GitHub Release 同一份文件</a>　|　<a href="https://github.com/kele551/iptv-shell/archive/refs/heads/main.zip">源码 zip（这条路要 Python 3.9+）</a></p>
 
 <p><b>第一次来，先打开官网</b>：<a href="https://kele551.github.io/iptv-shell/">https://kele551.github.io/iptv-shell/</a><br>
 官网有截图、安装方式，还能一键复制「给智能体的一句话」，比在 README 里翻更快。</p>
@@ -69,7 +69,7 @@
 ```
 请帮我把这个 IPTV 外壳装到你这台电脑上，再接上这台电脑所在的网络。
 
-第 0 步先拿东西：如果这台电脑上已经有 IPTV 外壳的项目目录，就直接用；没有就从 https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip 下载免安装包（这个地址连不上就换 https://github.com/kele551/iptv-shell/releases/download/v1.0/iptv-shell-Windows.zip），解压到 D:\Program Files\IPTV外壳（没有就新建这个目录；别解压到桌面，桌面只留图标），会得到一个 IPTV-Shell 文件夹，里面的 IPTV-Shell.exe 双击就能跑，这台电脑不用装 Python。
+第 0 步先拿东西：如果这台电脑上已经有 IPTV 外壳的项目目录，就直接用；没有就从 https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip 下载免安装包（这个地址连不上就换 https://github.com/kele551/iptv-shell/releases/latest/download/iptv-shell-Windows.zip），解压到 D:\Program Files\IPTV外壳（没有就新建这个目录；别解压到桌面，桌面只留图标），会得到一个 IPTV-Shell 文件夹，里面的 IPTV-Shell.exe 双击就能跑，这台电脑不用装 Python。
 
 然后按这个顺序做：跑 IPTV-Shell.exe probe（这个 exe 没有控制台窗口，结果会写到同一个文件夹里的 命令行输出.txt，等它自己跑完再读那个文件），把本机正在跑的服务、磁盘里的 m3u / m3u8 / xmltv 清单、已有的 IPTV 项目都列出来；选一份能用的接进外壳（改 IPTV-Shell 文件夹里的 config.json，或照 _internal\providers\转发示例.py 写一个适配器）；跑 IPTV-Shell.exe check（同样等它跑完、看 命令行输出.txt），出「可以交」才算接好。装好以后桌面会自动出现一个「IPTV外壳」图标，以后双击那个图标就能看（文件夹本身别放桌面）。
 

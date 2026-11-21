@@ -177,7 +177,7 @@ input:focus{border-color:#1f6feb}
     <p>整段粘进智能体对话框，它会自己在这台电脑上跑探路、找直播和点播数据流，接进外壳、跑快检、装到桌面。</p>
     <textarea id="aTxt" readonly>请帮我把这个 IPTV 外壳装到你这台电脑上，再接上这台电脑所在的网络。
 
-第 0 步先拿东西：如果这台电脑上已经有 IPTV 外壳的项目目录，就直接用；没有就从 https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip 下载免安装包（这个地址连不上就换 https://github.com/kele551/iptv-shell/releases/download/v1.0/iptv-shell-Windows.zip），解压到 D:\Program Files\IPTV外壳（没有就新建这个目录；别解压到桌面，桌面只留图标），会得到一个 IPTV-Shell 文件夹，里面的 IPTV-Shell.exe 双击就能跑，这台电脑不用装 Python。
+第 0 步先拿东西：如果这台电脑上已经有 IPTV 外壳的项目目录，就直接用；没有就从 https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip 下载免安装包（这个地址连不上就换 https://github.com/kele551/iptv-shell/releases/latest/download/iptv-shell-Windows.zip），解压到 D:\Program Files\IPTV外壳（没有就新建这个目录；别解压到桌面，桌面只留图标），会得到一个 IPTV-Shell 文件夹，里面的 IPTV-Shell.exe 双击就能跑，这台电脑不用装 Python。
 
 然后按这个顺序做：跑 IPTV-Shell.exe probe（这个 exe 没有控制台窗口，结果会写到同一个文件夹里的 命令行输出.txt，等它自己跑完再读那个文件），把本机正在跑的服务、磁盘里的 m3u / m3u8 / xmltv 清单、已有的 IPTV 项目都列出来；选一份能用的接进外壳（改 IPTV-Shell 文件夹里的 config.json，或照 _internal\providers\转发示例.py 写一个适配器）；跑 IPTV-Shell.exe check（同样等它跑完、看 命令行输出.txt），出「可以交」才算接好。装好以后桌面会自动出现一个「IPTV外壳」图标，以后双击那个图标就能看（文件夹本身别放桌面）。
 
