@@ -3,7 +3,7 @@
 
 <h1>IPTV 外壳</h1>
 
-<a href="https://github.com/kele551/iptv-shell" title="下载量 · 实时"><img alt="Downloads" src="https://img.shields.io/github/downloads/kele551/iptv-shell/total?style=flat-square&label=downloads&color=blue" height="30"></a>
+<a href="https://github.com/kele551/iptv-shell" title="下载量 · 实时"><img alt="Downloads" src="https://img.shields.io/badge/%E4%B8%8B%E8%BD%BD-%E6%BA%90%E7%A0%81zip-blue?style=flat-square" height="30"></a>
 <a href="https://hits.sh/github.com/kele551/iptv-shell/" title="浏览量 · 实时"><img alt="浏览量" src="https://hits.sh/github.com/kele551/iptv-shell.svg?label=views&color=1f5fd0" height="30"></a>
 
 <a href="https://github.com/kele551/iptv-shell/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue?style=flat-square"></a>
