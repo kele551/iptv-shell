@@ -15,3 +15,4 @@ data/*.local.xml
 *.local.xml
 providers/yunnan_dx.py
 !docs/icon.png
+!docs/qr-sponsor.png
