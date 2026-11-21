@@ -97,6 +97,41 @@ th{background:#f4f1ec;font-weight:650;font-size:13.5px;color:#3d434c}
 td{color:var(--sub)}
 td b{color:var(--ink)}
 
+/* 安装：深色面板（参照 Aerial 的 tab + 代码框做法） */
+.install{background:#0a0c0f;color:#e9eef4;padding:66px 0 74px;border-top:1px solid #1c2026}
+.install .wrap{max-width:1010px}
+.in-head{display:flex;align-items:center;gap:16px;margin-bottom:8px}
+.in-num{width:38px;height:38px;border-radius:999px;background:#1b2027;color:#fff;display:grid;place-items:center;font-weight:700;font-size:15px;flex:none}
+.install h2{color:#fff;margin:0;font-size:32px;letter-spacing:-.4px}
+.in-sub{color:#98a4b1;font-size:15px;margin:8px 0 22px;max-width:44em}
+.in-note{color:#7f8b98;font-size:13.5px;margin:14px 0 0}
+.tabs2{display:inline-flex;gap:4px;background:#12161b;border:1px solid #232a33;border-radius:12px;padding:5px;margin:6px 0 24px;flex-wrap:wrap}
+.tabs2 button{border:0;background:transparent;color:#98a4b1;padding:9px 18px;border-radius:9px;font-size:14.5px;cursor:pointer;font-family:inherit}
+.tabs2 button.on{background:#fff;color:#0b0d10;font-weight:650}
+.pane{display:none}
+.pane.on{display:block}
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0 6px}
+.chip{display:inline-flex;align-items:center;gap:9px;border:1px solid #262d36;background:#101419;border-radius:999px;padding:7px 15px;font-size:14px;color:#dee6ef}
+.chip i{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:12px;font-style:normal;font-weight:700;color:#fff}
+.codebox{position:relative;background:#11151a;border:1px solid #262d36;border-radius:14px;padding:22px 26px 22px 24px;margin-top:12px}
+.codebox pre{margin:0;white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:14.5px;line-height:1.95;color:#ccd6e2;padding-right:86px}
+.codebox .cp{position:absolute;right:14px;top:14px;background:#1d242d;border:1px solid #2d3641;color:#e3eaf2;
+  border-radius:8px;padding:6px 14px;font-size:13.5px;cursor:pointer;font-family:inherit}
+.codebox .cp:hover{background:#26303b}
+.install code{background:#1a2028;border:1px solid #29313b;border-radius:6px;padding:1px 6px;font-size:13px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;color:#cfe0f5}
+.steps2{display:grid;gap:12px;margin-top:8px}
+.s2{display:grid;grid-template-columns:34px 1fr;gap:14px;background:#11151a;border:1px solid #262d36;
+  border-radius:12px;padding:18px 20px}
+.s2>span{width:30px;height:30px;border-radius:999px;background:#fff;color:#0b0d10;display:grid;place-items:center;
+  font-weight:700;font-size:13.5px}
+.s2 b{color:#fff;font-weight:650}
+.s2 div{color:#a9b5c2;font-size:14px;line-height:1.8}
+.install .row{display:flex;gap:12px;flex-wrap:wrap}
+.install .btn{background:#1d242d;border-color:#2d3641;color:#e9eef4}
+.install .btn:hover{background:#26303b;border-color:#3a4652}
+
 footer{padding:44px 0 70px;border-top:1px solid var(--line);color:var(--sub);font-size:14px}
 footer .row{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
 footer .r{margin-left:auto;color:#9aa0a8;font-size:13px}
@@ -164,20 +199,67 @@ footer .r{margin-left:auto;color:#9aa0a8;font-size:13px}
   </div>
 </div></section>
 
-<section class="section" id="install"><div class="wrap">
-  <h2>三步用起来。</h2>
-  <p class="sub">不用编译、不用装运行库。Windows 上装个 Python 3.9 以上就行。</p>
-  <div class="steps">
-    <div class="step"><div class="n"></div><div><div class="t">下载并解压</div>
-      <div class="d">拿到 <code>IPTV外壳模板-v1.0.zip</code>，解压到任意目录（不要放在中文符号过多的深层路径）。</div></div></div>
-    <div class="step"><div class="n"></div><div><div class="t">接入你的线路</div>
-      <div class="d">打开 <code>config.json</code>：有 m3u 清单就把 <code>m3u_path</code> 指向直播清单、<code>vod_m3u</code> 指向点播清单；没有点播就留空，页签照样在。</div></div></div>
-    <div class="step"><div class="n"></div><div><div class="t">双击桌面图标</div>
-      <div class="d">跑 <code>tools\安装.vbs</code> 生成桌面图标，双击才开始运行：静默起服务，弹出应用窗口。关掉窗口服务还在，再点就回来。</div></div></div>
+<section class="install" id="install"><div class="wrap">
+  <div class="in-head"><span class="in-num">3</span><h2 style="margin:0">选一种方式安装</h2></div>
+  <p class="in-sub">不用编译、不用装运行库。Windows 上装个 Python 3.9 以上就行。</p>
+
+  <div class="tabs2" id="itabs">
+    <button class="on" data-p="agent">交给 Agent</button>
+    <button data-p="cmd">一行命令</button>
+    <button data-p="manual">手动</button>
+    <button data-p="phone">只用手机</button>
   </div>
-  <div style="margin-top:22px;display:flex;gap:12px;flex-wrap:wrap">
-    <a class="btn" href="https://github.com/kele551/iptv-shell/archive/refs/heads/main.zip" target="_blank" rel="noopener">下载源码 zip</a>
-    <a class="btn" href="https://github.com/kele551/iptv-shell/blob/main/README.md" target="_blank" rel="noopener">看完整说明</a>
+
+  <div class="pane on" id="p-agent">
+    <p class="in-sub">复制给能在电脑上运行命令的 Agent，比如：</p>
+    <div class="chips">
+      <span class="chip"><i style="background:#2aa07a">W</i>WorkBuddy</span>
+      <span class="chip"><i style="background:#3a6df0">豆</i>豆包电脑版</span>
+      <span class="chip"><i style="background:#6b4ef0">千</i>千问电脑版</span>
+      <span class="chip"><i style="background:#17a673">T</i>Trae</span>
+      <span class="chip"><i style="background:#d97757">C</i>Claude Code</span>
+      <span class="chip"><i style="background:#3f7de0">C</i>Codex</span>
+    </div>
+    <p class="in-note">手机上的对话只会给你步骤，不能动手；要在电脑上跑命令的那种。</p>
+    <div class="codebox">
+      <button class="cp" data-copy="#t-agent">复制</button>
+      <pre id="t-agent">请帮我把这个 IPTV 外壳接到你这台电脑所在的网络上：先读项目里的 README.md 和 智能体接入指南.md，然后你自己在这台电脑和当前网络里，把能用的直播和点播数据流找出来（本机在跑的服务、磁盘里的 m3u 和 xmltv 清单都算），接进外壳，跑到 tools\模板快检.py 出「可以交」，再装到桌面，双击就能看。播放只用这台电脑上装好的播放器（mpv 或 VLC），不要内嵌网页播放器，也不要开机自启。真找不到源再问我。
+
+不要把步骤列给我，你自己在这台电脑上执行。最后把 模板快检 的原始输出贴给我，不要只说「成功了」；没通过就说清哪一项没过、卡在哪。</pre>
+    </div>
+  </div>
+
+  <div class="pane" id="p-cmd">
+    <p class="in-sub">装了 git 和 Python 的话，一条命令把它拉下来并跑起来（先看演示线路）：</p>
+    <div class="codebox">
+      <button class="cp" data-copy="#t-cmd">复制</button>
+      <pre id="t-cmd">git clone https://github.com/kele551/iptv-shell.git
+cd iptv-shell
+python server.py --provider mock</pre>
+    </div>
+    <p class="in-note">要接自己的线路，改 <code>config.json</code> 的 <code>m3u_path</code>（直播）和 <code>vod_m3u</code>（点播），再 <code>python server.py</code>。</p>
+  </div>
+
+  <div class="pane" id="p-manual">
+    <div class="steps2">
+      <div class="s2"><span>1</span><div><b>下载并解压</b><br>拿到 <code>IPTV外壳模板-v1.0.zip</code>，解压到任意目录；不要放太深的中文路径。</div></div>
+      <div class="s2"><span>2</span><div><b>接入你的线路</b><br>打开 <code>config.json</code>：<code>m3u_path</code> 指直播清单，<code>vod_m3u</code> 指点播清单；没有点播就留空，页签照样在。</div></div>
+      <div class="s2"><span>3</span><div><b>双击桌面图标</b><br>跑 <code>tools\安装.vbs</code> 生成图标；双击才启动，关掉窗口服务还在，再点就回来。</div></div>
+    </div>
+    <div class="row" style="margin-top:20px">
+      <a class="btn" href="https://github.com/kele551/iptv-shell/archive/refs/heads/main.zip" target="_blank" rel="noopener">下载源码 zip</a>
+      <a class="btn" href="https://github.com/kele551/iptv-shell/blob/main/README.md" target="_blank" rel="noopener">看完整说明</a>
+    </div>
+  </div>
+
+  <div class="pane" id="p-phone">
+    <p class="in-sub">手机上装不了：它要在这台电脑上起服务、改配置、装桌面图标。手机上能做的只有一件事——</p>
+    <div class="codebox">
+      <button class="cp" data-copy="#t-phone">复制</button>
+      <pre id="t-phone">把这个网址发到电脑上，让电脑上的 Agent 照页面里的「给 Agent 的一句话」做：
+https://kele551.github.io/iptv-shell/</pre>
+    </div>
+    <p class="in-note">想手机上直接看台？同一宽带下用手机浏览器打开 <code>http://这台电脑的IP:8905/</code>，播放仍走电脑上的播放器。</p>
   </div>
 </div></section>
 
@@ -258,5 +340,24 @@ async function copyPrompt(){
 }
 document.getElementById('copyBtn').onclick=copyPrompt;
 document.getElementById('copyTop').onclick=copyPrompt;
+
+// 安装面板的页签
+document.querySelectorAll('#itabs button').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('#itabs button').forEach(x=>x.classList.toggle('on',x===b));
+    document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.p));
+  };
+});
+// 代码框右上角的复制
+document.querySelectorAll('.cp').forEach(btn=>{
+  btn.onclick=async()=>{
+    const el=document.querySelector(btn.dataset.copy);
+    const txt=el.textContent;
+    let ok=false;
+    try{await navigator.clipboard.writeText(txt);ok=true;}
+    catch(e){try{ok=document.execCommand('copy');}catch(_){ok=false;}}
+    toast(ok?'已复制':'没复制成，请手动选中再 Ctrl+C');
+  };
+});
 </script>
 </body></html>
