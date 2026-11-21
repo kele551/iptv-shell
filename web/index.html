@@ -1,0 +1,580 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="theme-color" content="#11161d">
+<meta name="color-scheme" content="dark">
+<title>__TITLE__ · __SUB__</title>
+<style>
+*{box-sizing:border-box;margin:0}
+html{color-scheme:dark;background:#0b0e12}
+body{background:#0b0e12;color:#e6edf3;font:16px/1.5 "Microsoft YaHei","Segoe UI",sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;align-items:baseline;gap:16px;padding:13px 18px;background:#11161d;border-bottom:1px solid #212932}
+h1{font-size:21px;font-weight:600;letter-spacing:.4px}
+h1 i{color:#4c9aff;font-style:normal}
+.badge{font-size:13px;color:#7b8794}
+.tabs{display:flex;gap:4px;margin-left:auto;background:#0b0e12;padding:3px;border-radius:9px;border:1px solid #212932}
+.tab{padding:6px 20px;border-radius:7px;cursor:pointer;color:#93a0ae;font-size:15px}
+.tab.on{background:#1f6feb;color:#fff}
+main{flex:1;display:flex;min-height:0}
+aside{width:212px;flex:none;background:#0e131a;border-right:1px solid #212932;overflow:auto;padding:10px 8px}
+.sect{font-size:12.5px;color:#5b6674;letter-spacing:1px;margin:12px 8px 5px}
+.cat{padding:8px 10px;border-radius:7px;cursor:pointer;color:#96a2b0;display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.cat:hover{background:#161f29;color:#e6edf3}
+.cat.on{background:#16283c;color:#68b1ff}
+.cat em{font-style:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cat b{font-weight:400;color:#566270;font-size:13.5px}
+section{flex:1;display:flex;flex-direction:column;min-width:0}
+.bar{display:flex;gap:12px;align-items:center;padding:10px 16px;background:#0e131a;border-bottom:1px solid #212932}
+input{flex:1;max-width:440px;background:#0b0e12;border:1px solid #263040;border-radius:8px;color:#e6edf3;padding:8px 12px;outline:none;font:inherit}
+input:focus{border-color:#1f6feb}
+.hint{color:#5b6674;font-size:13.5px}
+.list{flex:1;overflow:auto;padding:6px 10px 60px}
+.row{display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:8px;cursor:pointer;content-visibility:auto;contain-intrinsic-size:auto 44px}
+.row:hover{background:#151d27}
+.row .num{width:38px;flex:none;color:#68b1ff;font-weight:600;font-variant-numeric:tabular-nums;font-size:13.5px;text-align:right}
+.row .main{min-width:0;flex:1}
+.row .n{font-size:18px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .s{font-size:14.5px;color:#9ecbff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.row .side{flex:none;text-align:right;font-size:14.5px;color:#7b8794;min-width:84px}
+.row .nx{flex:none;width:300px;min-width:0;padding-left:8px}
+.row .nx .k{font-size:12.5px;color:#5b6674}
+.row .nx .v{font-size:15px;color:#6ee7a8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.row .nx .t{font-size:12.5px;color:#4fbd86;font-variant-numeric:tabular-nums;margin-top:2px}
+.row .star{flex:none;width:24px;text-align:center;color:#414b58;font-size:17px}
+.row .star.on{color:#e3b341}
+.bar2{height:2px;width:200px;max-width:45%;background:#1d2632;border-radius:1px;margin-top:5px;overflow:hidden}
+.bar2 i{display:block;height:100%;background:#2f81f7;width:0}
+.empty{color:#5b6674;padding:26px 12px;font-size:14.5px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#1f6feb;color:#fff;padding:10px 20px;border-radius:18px;font-size:15px;opacity:0;transition:.25s;pointer-events:none}
+.toast.on{opacity:1}
+.toast.err{background:#9b2c2c}
+.epg{width:430px;flex:none;background:#0e131a;border-left:1px solid #212932;display:none;flex-direction:column;min-height:0}
+.epg.on{display:flex}
+.epg .hd{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid #212932}
+.epg .hd .n{font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:17px}
+.epg .hd .x{cursor:pointer;color:#7b8794;font-size:18px;padding:0 4px}
+.epg .body{flex:1;overflow:auto;padding:6px}
+/* 节目单三色：已播=灰、正在播=蓝底白字、待播=浅绿，时间列跟着一起变色 */
+.p{padding:8px 10px;border-radius:7px;display:flex;gap:10px;font-size:15px;cursor:pointer;border-left:3px solid transparent}
+.p:hover{background:#151d27}
+.p .t{color:#68b1ff;width:100px;flex:none;font-variant-numeric:tabular-nums;font-size:13.5px;padding-top:1px}
+.p .m{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#cfe6d2}
+/* 待播（还没播）用明确绿色，跟正在播的蓝底彻底分开 */
+.p.fut .m{color:#6ee7a8}
+.p.fut .t{color:#4fbd86}
+.p.now{background:#12365a;border-left-color:#3f8ef7}
+.p.now .m{color:#fff;font-weight:600}
+.p.now .t{color:#9ecbff}
+.p .dot{width:7px;height:7px;border-radius:4px;background:#3f8ef7;flex:none;margin-top:6px}
+.past .m{color:#66707c}
+.past .t{color:#4c5763}
+.p.past{opacity:.7}
+.list.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(126px,1fr));gap:16px 12px;align-content:start;padding:12px 16px 70px}
+.card{cursor:pointer;min-width:0}
+.card .poster{position:relative;aspect-ratio:2/3;border-radius:9px;overflow:hidden;background:#151d27;border:1px solid #1e2731}
+.card .poster img{width:100%;height:100%;object-fit:cover;display:block}
+.card .poster .ph{display:flex;align-items:center;justify-content:center;height:100%;color:#4a5563;font-size:13px}
+.card:hover .poster{border-color:#2f81f7}
+.card .cname{margin-top:8px;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .cmeta{margin-top:3px;font-size:12.5px;color:#8b96a4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .star{position:absolute;right:6px;top:6px;width:24px;height:24px;line-height:24px;text-align:center;border-radius:12px;background:rgba(6,10,15,.72);color:#8b96a4;font-size:14px}
+.card .star.on{color:#e3b341}
+.card .play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44px;height:44px;line-height:44px;text-align:center;border-radius:22px;background:rgba(31,111,235,.92);color:#fff;opacity:0;transition:.15s;font-size:15px}
+.card:hover .play{opacity:1}
+.cat.off{opacity:.5;cursor:not-allowed}
+.cat.off:hover{background:none;color:#96a2b0}
+.cat.par{font-weight:600;color:#a9b6c4}
+.cat.par.on{background:#16283c;color:#68b1ff}
+.cat .arw{display:inline-block;width:14px;font-style:normal;color:#4c9aff;font-size:12.5px;vertical-align:1px}
+.cat.sub{padding-left:28px;font-size:14px;color:#8b96a4}
+.cat.sub:hover{background:#161f29;color:#e6edf3}
+.cat.sub.on{background:#16283c;color:#68b1ff}
+.cat.sub b{font-size:13px}
+/* 节目单小图例 */
+.epg .lg{display:flex;gap:12px;padding:7px 14px 3px;font-size:12.5px;color:#8b96a4;border-bottom:1px solid #1a2230}
+.epg .lg span{display:inline-flex;align-items:center;gap:5px}
+.epg .lg i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.epg .lg i.a{background:#12365a;border-left:2px solid #3f8ef7}
+.epg .lg i.b{background:#0f2a1e;border-left:2px solid #4fbd86}
+.epg .lg i.c{background:#20262d;border-left:2px solid #414b58}
+/* 影片详情卡 */
+.dlg{position:fixed;inset:0;background:rgba(4,7,11,.72);display:none;z-index:60;padding:40px 24px}
+.dlg.on{display:flex;align-items:center;justify-content:center}
+.dlg .box{width:min(880px,96vw);max-height:86vh;overflow:auto;background:#111823;border:1px solid #24303f;border-radius:12px}
+.dlg .pic{height:280px;background:#0a0f16 center/cover no-repeat;position:relative}
+.dlg .pic .mask{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,10,15,.15),rgba(10,15,22,.95))}
+.dlg .pic .t1{position:absolute;left:22px;right:22px;bottom:16px;font-size:26px;font-weight:700;text-shadow:0 2px 10px #000}
+.dlg .body{padding:16px 22px 20px}
+.dlg .meta{color:#8b96a4;font-size:15px;margin-bottom:10px}
+.dlg .tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.dlg .tags span{background:#17283a;color:#7fb6ff;border:1px solid #24405c;border-radius:6px;padding:3px 9px;font-size:14px;cursor:pointer}
+.dlg .line{font-size:16px;line-height:1.7;color:#c9d4de;margin:6px 0}
+.dlg .line b{color:#8b96a4;font-weight:400}
+.dlg .desc{font-size:16px;line-height:1.8;color:#b9c6d2;margin-top:12px}
+.dlg .acts{display:flex;gap:12px;margin-top:18px;padding-top:14px;border-top:1px solid #1d2836}
+.dlg .btn{background:#2f6fe4;color:#fff;border:0;border-radius:8px;padding:10px 26px;font-size:17px;cursor:pointer}
+.dlg .btn.ghost{background:#1b2532;color:#a9b6c4}
+.dlg .x2{position:absolute;right:14px;top:10px;color:#cfd8e2;font-size:22px;cursor:pointer;z-index:2}
+/* 复制给智能体的一句话 */
+.agent{margin-left:10px;background:#152638;border:1px solid #24405c;color:#8fc0ff;border-radius:8px;padding:7px 13px;font-size:13px;cursor:pointer;white-space:nowrap}
+.agent:hover{background:#1c3350;color:#cfd8e2}
+.dlg .abox{width:min(760px,94vw);background:#111823;border:1px solid #24303f;border-radius:12px;padding:20px 22px;position:relative}
+.dlg .abox h3{margin:0 0 6px;font-size:20px;color:#e6edf3}
+.dlg .abox p{margin:0 0 12px;font-size:14px;color:#8b96a4;line-height:1.7}
+.dlg .abox textarea{width:100%;height:220px;background:#0b1017;color:#c9d4de;border:1px solid #24303f;border-radius:8px;padding:12px;font-size:14px;line-height:1.75;font-family:inherit;resize:vertical}
+.dlg .abox .acts{display:flex;gap:12px;margin-top:14px}
+</style></head><body>
+<header>
+  <h1>__TITLE__ <i>· __SUB__</i></h1>
+  <div class="badge" id="st">连接中…</div>
+  <div class="badge" id="ver" style="color:#4fbd86">界面 --</div>
+  <div class="tabs"><div class="tab on" data-tab="live">直播</div><div class="tab" data-tab="vod">点播</div></div>
+  <div class="agent" id="agentBtn">接线路？复制给智能体的一句话</div>
+</header>
+<main>
+  <aside id="cats"></aside>
+  <section>
+    <div class="bar"><input id="kw" placeholder="搜台名 / 节目 / 片名…"><span class="hint" id="cnt"></span><span class="hint">点海报看详情/简介再播</span></div>
+    <div class="list" id="list"></div>
+  </section>
+  <aside class="epg" id="epg">
+    <div class="hd"><div class="n" id="epgName">节目单</div><div class="x" id="epgX">✕</div></div>
+    <div class="lg"><span><i class="a"></i>正在播</span><span><i class="b"></i>待播</span><span><i class="c"></i>已播</span></div>
+    <div class="body" id="epgBody"></div>
+  </aside>
+</main>
+<div class="toast" id="toast"></div>
+<div class="dlg" id="adlg">
+  <div class="abox">
+    <div class="x2" id="adlgX">✕</div>
+    <h3>把这一句复制给你的智能体</h3>
+    <p>整段粘进智能体对话框，它就会自己在这台电脑和当前网络里找直播、点播数据流，接进外壳、跑快检、装到桌面。</p>
+    <textarea id="aTxt" readonly>请帮我把这个 IPTV 外壳接到你这台电脑所在的网络上：先读项目里的 README.md 和 智能体接入指南.md，然后你自己在这台电脑和当前网络里，把能用的直播和点播数据流找出来（本机在跑的服务、运营商 IPTV 抓的源、磁盘里的 m3u 和 xmltv 清单都算），接进外壳，跑到 tools\模板快检.py 出「可以交」，再装到桌面，双击就能看。播放只用这台电脑上装好的播放器（mpv 或 VLC），不要内嵌网页播放器，也不要开机自启。真找不到源再问我。
+不要把步骤列给我，你自己在这台电脑上执行。最后把 模板快检 的原始输出贴给我，不要只说「成功了」；没通过就说清哪一项没过、卡在哪。</textarea>
+    <div class="acts">
+      <button class="btn" id="aCopy">复制这一段</button>
+      <button class="btn ghost" id="aClose">关闭</button>
+    </div>
+  </div>
+</div>
+<div class="dlg" id="dlg">
+  <div class="box">
+    <div class="pic" id="dlgPic"><div class="x2" id="dlgX">✕</div><div class="mask"></div><div class="t1" id="dlgName"></div></div>
+    <div class="body">
+      <div class="meta" id="dlgMeta"></div>
+      <div class="tags" id="dlgTags"></div>
+      <div class="line" id="dlgDir"></div>
+      <div class="line" id="dlgAct"></div>
+      <div class="desc" id="dlgDesc"></div>
+      <div class="acts">
+        <button class="btn" id="dlgPlay">▶ 播放</button>
+        <button class="btn ghost" id="dlgFav">☆ 收藏</button>
+        <button class="btn ghost" id="dlgClose">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let tab='live', cat='', live=null, vod=[], vodCats=[], seen=[], vodType='全部', vodTypes={};
+let vodBands={}, vodBand='', vodFk=false, vodTags=[], vodSort='', vodTag='';
+let favLive=JSON.parse(localStorage.getItem('iptv.fav.live')||'[]');
+let favVod=(()=>{try{const v=JSON.parse(localStorage.getItem('iptv.fav.vod')||'{}');
+  return Array.isArray(v)?Object.fromEntries(v.map(k=>[k,''])):(v||{});}catch(e){return {};}})();
+let recent=JSON.parse(localStorage.getItem('iptv.recent')||'[]');
+function save(){localStorage.setItem('iptv.fav.live',JSON.stringify(favLive));
+ localStorage.setItem('iptv.fav.vod',JSON.stringify(favVod));localStorage.setItem('iptv.recent',JSON.stringify(recent.slice(0,30)));}
+function toast(t,err){const el=$('toast');el.textContent=t;el.className='toast on'+(err?' err':'');clearTimeout(el._t);el._t=setTimeout(()=>el.className='toast',2400);}
+function esc(s){return (s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
+async function openEpg(code,name){
+  const p=$('epg');$('epgName').textContent=name+' · 今天节目单';
+  $('epgBody').innerHTML='<div class="empty">读取中…</div>';p.classList.add('on');
+  try{
+    const info=await j('/epg?code='+code);
+    const list=info.list||[];
+    if(!list.length){$('epgBody').innerHTML='<div class="empty">这台今天没有节目单数据。</div>';return;}
+    const now=new Date(),hh=String(now.getHours()).padStart(2,'0'),mm=String(now.getMinutes()).padStart(2,'0');
+    const cur=hh+mm;
+    const rows=list.map(x=>{
+      const isNow = x.s && x.e && x.s<=cur && cur<x.e;
+      const past = x.e && x.e<=cur;
+      return '<div class="p'+(isNow?' now':(past?' past':' fut'))+'"><div class="t">'+esc(x.s)+'-'+esc(x.e)+'</div>'
+        +'<div class="dot" style="'+(isNow?'':'background:transparent')+'"></div>'
+        +'<div class="m">'+esc(x.n)+'</div></div>';
+    });
+    $('epgBody').innerHTML=rows.join('');
+    $('epgBody').querySelectorAll('.p').forEach(r=>r.onclick=()=>play('/ch/'+code+'.m3u8',name));
+    const el=$('epgBody').querySelector('.p.now');
+    if(el) $('epgBody').scrollTop=Math.max(0,el.offsetTop-120);
+    const btn=document.createElement('div');
+    btn.className='p';btn.style.marginTop='6px';
+    btn.innerHTML='<div class="t">▶</div><div class="m" style="color:#68b1ff">现在就看这台</div>';
+    btn.onclick=()=>play('/ch/'+code+'.m3u8',name);
+    $('epgBody').appendChild(btn);
+  }catch(e){$('epgBody').innerHTML='<div class="empty">节目单读取失败。</div>';}
+}
+$('epgX').onclick=()=>$('epg').classList.remove('on');
+function play(path,title,key,kind){
+  if(key){recent=recent.filter(r=>r.key!==key);recent.unshift({key,kind,title});save();}
+  fetch('/play?u='+encodeURIComponent(path)+'&t='+encodeURIComponent(title||''))
+   .then(r=>r.json()).then(d=>toast(d.ok?('正在播：'+title):('打不开：'+(d.err||'')),!d.ok))
+   .catch(()=>toast('请求失败',true));
+}
+async function j(u){const r=await fetch(u);return r.json();}
+
+function pseudo(){
+  const allVod=Object.values(vodTypes).reduce((a,b)=>a+b,0)||((vodPage&&vodPage.total)||0);
+  const list=[{n:'全部',c:tab==='live'?(live?live.total:0):allVod}];
+  if(tab==='live') list.push({n:'收藏',c:favLive.length}); else list.push({n:'收藏',c:Object.keys(favVod).length});
+  list.push({n:'最近播放',c:Math.min(30,recent.filter(r=>r.kind===tab).length)});
+  if(tab==='vod'){const k=k4Total(); if(k) list.push({n:'4K专区',c:k,kind:'4k'});}
+  if(tab==='vod') list.push({n:'最新上线',c:allVod,kind:'new'});
+  return list;
+}
+function k4Total(){let n=0;Object.values(vodBands||{}).forEach(d=>{n+=(d['4k']||0)});return n;}
+// 左栏口径：一级只按类型（电影/电视剧/纪录/综艺/动漫/少儿），二级只按年份 + 4K。
+// 上游那些「VIP影视（新）·全部电视剧」「纪录专区·地理中国」一律不进左栏，太乱。
+const TYPE_ORDER=['电影','电视剧','纪录','综艺','动漫','少儿'];
+const BANDS=[['2026','2026 年'],['2025','2025 年'],['2024','2024 年'],['old','2023 及更早']];
+let openTypes={'电影':1,'电视剧':1};
+function drawCats(){
+  const box=$('cats');box.innerHTML='';
+  const ps=pseudo();
+  ps.forEach(p=>{
+    const d=document.createElement('div');
+    const on = p.kind==='4k' ? (vodFk && vodType==='全部')
+             : p.kind==='new' ? (vodSort==='up')
+             : (cat==='@'+p.n && !vodFk && vodSort!=='up' && !vodTag);
+    d.className='cat'+(on?' on':'');
+    d.innerHTML='<em>'+esc(p.n)+'</em><b>'+p.c+'</b>';
+    d.onclick=()=>{
+      vodBand='';vodType='全部';vodTag='';
+      if(p.kind==='4k'){vodFk=true;vodSort='';cat='@4K专区';}
+      else if(p.kind==='new'){vodFk=false;vodSort='up';cat='@最新上线';}
+      else{vodFk=false;vodSort='';cat='@'+p.n;}
+      drawCats();if(tab==='vod')loadVodPage(true);else drawList();
+    };
+    box.appendChild(d);
+  });
+  if(tab==='vod'){
+    const ht=document.createElement('div');ht.className='sect';ht.textContent='片库分类';box.appendChild(ht);
+    const bands=vodBands||{};
+    let types=Object.keys(bands).filter(t=>t!=='全部');
+    // 「其他」只有零星几条，左栏不显示，免得又变乱
+    types=types.filter(t=>t!=='其他'||(bands[t].all||0)>=20);
+    types.sort((a,b)=>{
+      const ia=TYPE_ORDER.indexOf(a),ib=TYPE_ORDER.indexOf(b);
+      if(ia<0&&ib<0) return (bands[b].all||0)-(bands[a].all||0);
+      if(ia<0) return 1; if(ib<0) return -1;
+      return ia-ib;
+    });
+    types.forEach(t=>{
+      const d=bands[t], open=!!openTypes[t];
+      const par=document.createElement('div');
+      par.className='cat par'+((vodType===t&&!vodFk&&!vodBand)?' on':'');
+      par.innerHTML='<em><i class="arw">'+(open?'▾':'▸')+'</i>'+esc(t)+'</em><b>'+(d.all||0)+'</b>';
+      par.onclick=()=>{
+        if(vodType===t&&open&&!vodBand&&!vodFk) delete openTypes[t]; else openTypes[t]=1;
+        vodType=t;vodBand='';vodFk=false;vodSort='';vodTag='';cat='@全部';drawCats();loadVodPage(true);
+      };
+      box.appendChild(par);
+      if(!open) return;
+      const kids=[['','全部']].concat(BANDS).filter(([k])=>!k||(d[k]||0)>0);
+      if((d['4k']||0)>0) kids.push(['4k','4K 高清']);
+      kids.forEach(([k,label])=>{
+        const on = vodType===t && (k==='4k'?vodFk:(vodBand===k&&!vodFk));
+        const c = k==='4k'?d['4k']:(k?(d[k]||0):d.all);
+        const sub=document.createElement('div');
+        sub.className='cat sub'+(on?' on':'');
+        sub.innerHTML='<em>'+esc(label)+'</em><b>'+c+'</b>';
+        sub.onclick=()=>{vodType=t;openTypes[t]=1;vodBand=(k==='4k'?'':k);vodFk=(k==='4k');vodSort='';vodTag='';cat='@全播';drawCats();loadVodPage(true);};
+        box.appendChild(sub);
+      });
+    });
+    // 题材标签：从上游 pgmSndClass 来的（悬疑/喜剧/动作…），比年份更好筛
+    if((vodTags||[]).length){
+      const ht2=document.createElement('div');ht2.className='sect';ht2.textContent='题材';box.appendChild(ht2);
+      vodTags.forEach(t=>{
+        const d2=document.createElement('div');
+        d2.className='cat sub'+(vodTag===t.n?' on':'');
+        d2.style.paddingLeft='14px';
+        d2.innerHTML='<em>'+esc(t.n)+'</em><b>'+t.c+'</b>';
+        d2.onclick=()=>{vodTag=(vodTag===t.n?'':t.n);vodType='全部';vodBand='';vodFk=false;vodSort='';cat='@题材';drawCats();loadVodPage(true);};
+        box.appendChild(d2);
+      });
+    }
+  } else {
+    const h=document.createElement('div');h.className='sect';h.textContent='频道分组';box.appendChild(h);
+    const list=(live?live.groups:[]).map(g=>({n:g.name,c:g.count}));
+    list.forEach(g=>{
+      const d=document.createElement('div');
+      d.className='cat'+(cat===g.n?' on':'');
+      d.innerHTML='<em>'+esc(g.n)+'</em><b>'+g.c+'</b>';
+      d.onclick=()=>{cat=g.n;drawCats();drawList();};
+      box.appendChild(d);
+    });
+  }
+  if(!cat) cat='@全部';
+}
+function progress(c){
+  if(!c.cur) return '';
+  const s=c.cur_start,e=c.cur_end;
+  if(!s||!e) return '';
+  const to=mm=>{const h=+mm.slice(0,2),m=+mm.slice(2,4);return h*60+m;};
+  const now=new Date();const n=now.getHours()*60+now.getMinutes();
+  let a=to(s),b=to(e);if(b<a)b+=1440;
+  let p=Math.max(0,Math.min(100,((n<a?n+1440:n)-a)/(b-a)*100));
+  return '<div class="bar2"><i style="width:'+p.toFixed(1)+'%"></i></div>';
+}
+function drawList(){
+  const kw=($('kw').value||'').trim().toLowerCase(), box=$('list');
+  const rows=[];let n=0;
+  if(tab==='live'){
+    let items=[];
+    (live?live.groups:[]).forEach(g=>{ if(cat!=='@全部'&&cat!=='@收藏'&&cat!=='@最近播放'&&g.name!==cat) return;
+      g.items.forEach(c=>items.push(c));});
+    if(cat==='@收藏') items=items.filter(c=>favLive.includes('live:'+c.code));
+    if(cat==='@最近播放'){const ks=recent.filter(r=>r.kind==='live').map(r=>r.key);
+      items=items.filter(c=>ks.includes('live:'+c.code)).sort((a,b)=>ks.indexOf('live:'+a.code)-ks.indexOf('live:'+b.code));}
+    items.forEach(c=>{
+      if(kw && !((c.name||'').toLowerCase().includes(kw)||(c.cur||'').toLowerCase().includes(kw))) return;
+      n++;
+      const fav=favLive.includes('live:'+c.code);
+      rows.push('<div class="row" data-p="/ch/'+c.code+'.m3u8" data-t="'+esc(c.name)+'" data-k="live:'+c.code+'" data-kind="live">'
+        +'<div class="num">'+esc(c.num)+'</div>'
+        +'<div class="star'+(fav?' on':'')+'" data-f="live:'+c.code+'">'+(fav?'★':'☆')+'</div>'
+        +'<div class="main"><div class="n">'+esc(c.name)+'</div>'
+        +'<div class="s">'+(c.cur?esc(c.cur)+'　'+esc(c.cur_start||'')+'-'+esc(c.cur_end||''):'（暂无节目单）')+'</div>'+progress(c)+'</div>'
+        +'<div class="nx">'+(c.next
+            ? '<div class="k">接下来</div><div class="v">'+esc(c.next)+'</div><div class="t">'+esc(c.next_start||'')+'</div>'
+            : '<div class="k">接下来</div><div class="v" style="color:#4a5563">暂无</div>')+'</div>'
+        +'<div class="side" data-e="'+c.code+'" data-name="'+esc(c.name)+'">'
+        +'<div style="color:#4c9aff">节目单 ›</div></div></div>');
+    });
+  }else{
+    loadVodPage(true);
+    return;
+  }
+  $('cnt').textContent='共 '+n+' 项';
+  box.classList.remove('grid');
+  box.innerHTML = rows.length? rows.join('') : '<div class="empty">这一类暂时没有可播的内容。</div>';
+  box.querySelectorAll('.row').forEach(r=>r.onclick=e=>{
+    if(e.target.classList.contains('star')) return;
+    const side=e.target.closest('.side');
+    if(side && side.dataset.e){openEpg(side.dataset.e,side.dataset.name);return;}
+    play(r.dataset.p,r.dataset.t,r.dataset.k,r.dataset.kind);
+  });
+  box.querySelectorAll('.star').forEach(s=>s.onclick=e=>{
+    e.stopPropagation();const f=s.dataset.f,t=s.dataset.t||'';
+    if(f.startsWith('live:')){const i=favLive.indexOf(f);if(i>=0)favLive.splice(i,1);else favLive.push(f);}
+    else{if(favVod[f])delete favVod[f];else favVod[f]=t;}
+    save();
+    if(tab==='vod'){renderVod();drawCats();}else{drawList();drawCats();}
+  });
+}
+let vodPage={items:[],total:0,offset:0,loading:false,search:''};
+async function loadVodPage(reset){
+  if(tab!=='vod') return;
+  // cat 以 @ 开头的都是左栏虚拟项（全部/收藏/最近/4K专区），不当栏目名传给后端
+  const virtual=(cat||'').charAt(0)==='@';
+  const isFavOrRecent = cat==='@收藏' || cat==='@最近播放';
+  if(!reset && vodPage.loading) return;
+  if(reset){vodPage.items=[];vodPage.offset=0;vodPage.total=0;}
+  if(!isFavOrRecent){
+    vodPage.loading=true; $('cnt').textContent='正在取片库…';
+    try{
+      const kw=($('kw').value||'').trim();
+      if(kw){
+        // 输片名就搜门户全库（含专区/VIP），不是只在本地库里筛
+        const s=await j('/api/vod.search?kw='+encodeURIComponent(kw)+'&limit=60');
+        vodPage.search=kw;
+        vodPage.total=s.total||0;
+        vodPage.items=(s.items||[]);
+        vodPage.offset=vodPage.items.length;
+        $('st').textContent='全库搜索 '+vodPage.total+' 部';
+      }else{
+      vodPage.search='';
+      const d=await j('/api/vod.items.json?cat='+encodeURIComponent(virtual?'':cat)
+        +'&type='+encodeURIComponent(vodType)+'&yb='+encodeURIComponent(vodBand||'')
+        +'&fk='+(vodFk?'1':'0')+'&sort='+encodeURIComponent(vodSort||'')
+        +'&tg='+encodeURIComponent(vodTag||'')
+        +'&kw=&offset='+vodPage.offset+'&limit=300');
+      vodPage.total=d.total||0;
+      vodPage.items=vodPage.items.concat(d.items||[]);
+      vodPage.offset=vodPage.items.length;
+      const parts=[];
+      if(vodSort==='up') parts.push('最新上线');
+      if(vodTag) parts.push('题材：'+vodTag);
+      if(vodFk) parts.push('4K');
+      if(vodType&&vodType!=='全部') parts.push(vodType);
+      if(vodBand) parts.push(vodBand==='old'?'2023 及更早':vodBand+' 年');
+      $('st').textContent=(parts.length?parts.join(' · ')+' ':'')+'共 '+vodPage.total+' 部';
+      }
+    }catch(e){}
+    vodPage.loading=false;
+  }
+  renderVod();
+}
+function vRow(v,key){
+  const fav=!!favVod[key];
+  const pic=v.img?'/poster?u='+encodeURIComponent(v.img):'';
+  return '<div class="card" data-p="/vod/'+v.pid+'/'+v.cid+'.m3u8" data-t="'+esc(v.name)+'" data-k="'+key+'" data-kind="vod">'
+    +'<div class="poster">'+(pic?'<img loading="lazy" src="'+pic+'" alt="">':'<div class="ph">无海报</div>')
+    +'<div class="star'+(fav?' on':'')+'" data-f="'+key+'" data-t="'+esc(v.name)+'">'+(fav?'★':'☆')+'</div>'
+    +'<div class="play">▶</div></div>'
+    +'<div class="cname">'+esc(v.name)+'</div>'
+    +'<div class="cmeta">'+[(v.type&&v.type!=='电影')?v.type:'',(+v.vol>1)?('全'+v.vol+'集'):'',v.year,v.res].filter(Boolean).map(esc).join(' · ')+'</div></div>';
+}
+let vodMap={};
+function openDetail(v,key){
+  if(!v) return;
+  const d=$('dlg');
+  $('dlgName').textContent=v.name||'';
+  const JUNK=['其他','未知','null',''];
+  const meta=[v.type&&v.type!=='电影'?v.type:'',(+v.vol>1)?('全'+v.vol+'集'):'',v.year,
+              v.reg,v.lang,v.res].filter(x=>x&&JUNK.indexOf(x)<0).join(' · ');
+  $('dlgMeta').textContent=meta||'　';
+  const tg=(v.tg||'').split(',').map(x=>x.trim()).filter(Boolean);
+  $('dlgTags').innerHTML=tg.map(t=>'<span data-tg="'+esc(t)+'">'+esc(t)+'</span>').join('');
+  $('dlgTags').querySelectorAll('span').forEach(s=>s.onclick=()=>{
+    vodTag=s.dataset.tg;vodType='全部';vodBand='';vodFk=false;vodSort='';cat='@题材';
+    d.classList.remove('on');drawCats();loadVodPage(true);
+  });
+  $('dlgDir').innerHTML=v.dir?('<b>导演　</b>'+esc(v.dir)):'';
+  $('dlgAct').innerHTML=v.act?('<b>主演　</b>'+esc(v.act)):'';
+  $('dlgDesc').textContent=v.desc||'（暂无简介）';
+  const pic=v.still?'/poster?u='+encodeURIComponent(v.still)
+            :(v.img?'/poster?u='+encodeURIComponent(v.img):'');
+  $('dlgPic').style.backgroundImage=pic?('linear-gradient(180deg,rgba(6,10,15,.35),rgba(10,15,22,.92)),url("'+pic+'")'):'';
+  $('dlgFav').textContent=(key&&favVod[key])?'★ 已收藏':'☆ 收藏';
+  $('dlgPlay').onclick=()=>{d.classList.remove('on');play('/vod/'+v.pid+'/'+v.cid+'.m3u8',v.name,key,'vod');};
+  $('dlgFav').onclick=()=>{
+    if(!key) return;
+    if(favVod[key]) delete favVod[key]; else favVod[key]=v.name||'';
+    save();$('dlgFav').textContent=(favVod[key])?'★ 已收藏':'☆ 收藏';renderVod();drawCats();
+  };
+  d.classList.add('on');
+}
+$('dlgX').onclick=()=>$('dlg').classList.remove('on');
+$('dlgClose').onclick=()=>$('dlg').classList.remove('on');
+$('dlg').onclick=e=>{if(e.target.id==='dlg') $('dlg').classList.remove('on');};
+function renderVod(){
+  const box=$('list'), rows=[];
+  vodMap={};
+  box.classList.add('grid');
+  if(cat==='@收藏'){
+    Object.entries(favVod).forEach(([k,title])=>{
+      const p=k.split(':');
+      rows.push(vRow({pid:p[1],cid:p[2],name:title||'(收藏的片子)',cat:'',sub:'收藏'},k));
+    });
+    $('cnt').textContent='收藏 '+rows.length+' 部';
+  }else if(cat==='@最近播放'){
+    recent.filter(r=>r.kind==='vod').slice(0,30).forEach(r=>{
+      const p=r.key.split(':');
+      rows.push(vRow({pid:p[1],cid:p[2],name:r.title||'',cat:'',sub:'最近播放'},r.key));
+    });
+    $('cnt').textContent='最近 '+rows.length+' 部';
+  }else{
+    vodPage.items.forEach(v=>{vodMap['vod:'+v.pid+':'+v.cid]=v;rows.push(vRow(v,'vod:'+v.pid+':'+v.cid));});
+    $('cnt').textContent = vodPage.search
+      ? ('全库命中 '+rows.length+' 部（含机顶盒专区/VIP 内容，未订购的点开会提示无权限）')
+      : ('已显示 '+rows.length+' / 共 '+vodPage.total+' 部（往下滚自动续）');
+  }
+  box.innerHTML = rows.length? rows.join('') : '<div class="empty">这一类暂时没有内容；片库刚启动时可能需要等十几秒。</div>';
+  box.querySelectorAll('.card').forEach(r=>r.onclick=e=>{
+    if(e.target.classList.contains('star')) return;
+    openDetail(vodMap[r.dataset.k], r.dataset.k);
+  });
+  box.querySelectorAll('.star').forEach(s=>s.onclick=e=>{
+    e.stopPropagation();const f=s.dataset.f,t=s.dataset.t||'';
+    if(favVod[f])delete favVod[f];else favVod[f]=t;
+    save();renderVod();drawCats();
+  });
+}
+const listBox=$('list');
+listBox.onscroll=()=>{
+  if(tab!=='vod'||cat==='@收藏'||cat==='@最近播放'||vodPage.search) return;
+  if(vodPage.loading||vodPage.items.length>=vodPage.total) return;
+  if(listBox.scrollTop+listBox.clientHeight>listBox.scrollHeight-400) loadVodPage(false);
+};
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
+  tab=t.dataset.tab;cat='';loadTab();
+});
+async function loadTab(){
+  if(tab==='live'){
+    if(!live){live=await j('/api/live.json');}
+    $('st').textContent='直播 '+live.total+' 台 · 节目单更新 '+live.updated;
+  }else{
+    const caps=(window.TPL&&window.TPL.caps)||{};
+    if(!caps.vod){
+      drawCats();
+      $('st').textContent='这条线路没有点播片库';
+      $('cnt').textContent='点播 0 部';
+      const box=$('list');box.classList.add('grid');
+      box.innerHTML='<div class="empty">这条线路暂时没有点播内容。要让点播也能用，接入时补一份点播清单（config.json 填 vod_m3u），或让线路本身提供点播数据。</div>';
+      return;
+    }
+    if(!vodCats.length){
+      let n=0;
+      while(!vodCats.length&&n<40){
+        n++;
+        $('st').textContent='片库读取中… 已等 '+((n-1)*3)+' 秒（本机首次整理约 1 分钟，之后秒开）';
+        try{
+          const m=await j('/api/vod.json');
+          if(m.total){
+            vodCats=Object.entries(m.groups||{}).map(([nn,c])=>({n:nn,c})).sort((a,b)=>b.c-a.c);
+            vodTypes=m.types||{};
+            vodBands=m.bands||{};
+            vodTags=m.tags||[];
+            break;
+          }
+          if(m.building===false){
+            $('st').textContent='这条线路没有点播片库';
+            $('cnt').textContent='点播 0 部';
+            const box=$('list');box.classList.add('grid');
+            box.innerHTML='<div class="empty">这条线路暂时没有点播内容。要让点播也能用，接入时补一份点播清单（config.json 填 vod_m3u），或让线路本身提供点播数据。</div>';
+            return;
+          }
+        }catch(e){}
+        await new Promise(r=>setTimeout(r,3000));
+      }
+      if(!vodCats.length){$('st').textContent='片库还没读出来，点"点播"重试一次';return;}
+    }
+    drawCats();
+    await loadVodPage(true);
+    return;
+  }
+  drawCats();drawList();
+}
+let kwT=null;
+$('kw').oninput=()=>{
+  if(tab==='vod'){
+    clearTimeout(kwT);
+    kwT=setTimeout(()=>loadVodPage(true),600);
+  }else drawList();
+};
+if(location.hash==='#vod'){document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.tab==='vod'));tab='vod';}
+// 复制给智能体的一句话
+$('agentBtn').onclick=()=>$('adlg').classList.add('on');
+$('adlgX').onclick=()=>$('adlg').classList.remove('on');
+$('aClose').onclick=()=>$('adlg').classList.remove('on');
+$('adlg').onclick=e=>{if(e.target.id==='adlg')$('adlg').classList.remove('on');};
+$('aCopy').onclick=async()=>{
+  const box=$('aTxt');
+  box.focus();box.select();
+  let ok=false;
+  try{await navigator.clipboard.writeText(box.value);ok=true;}
+  catch(e){try{ok=document.execCommand('copy');}catch(_){}}
+  toast(ok?'已复制，去粘给智能体':'没复制成，请手动全选（Ctrl+A）再 Ctrl+C');
+};
+loadTab();
+// 服务重启（我改了界面/代码）后，这个窗口自己刷新一次，不用手动按 F5
+let bootId=null;
+(async()=>{try{const s=await j('/status');bootId=s.boot||null;
+  if(s.boot_str) $('ver').textContent='界面 '+s.boot_str;}catch(e){}})();
+setInterval(async()=>{
+  try{const s=await j('/status');
+    if(bootId&&s.boot&&s.boot!==bootId){bootId=s.boot;location.reload();}
+    else if(!bootId&&s.boot){bootId=s.boot;}
+  }catch(e){}
+},20000);
+</script></body></html>

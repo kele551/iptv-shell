@@ -1,0 +1,15 @@
+# 只提交源码，不提交成品与本地缓存
+builds/
+docs/*.png
+cache/
+logs/
+__pycache__/
+*.pyc
+*.log
+*.bak
+*.old
+# 用户自己的线路清单不进仓库（本项目只带虚构演示数据）
+data/*.local.m3u
+data/*.local.xml
+*.local.m3u
+*.local.xml

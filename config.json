@@ -1,0 +1,20 @@
+{
+  "port": 8905,
+  "title": "我的IPTV",
+  "sub": "本机外壳",
+  "provider": "mock",
+  "ttl": {
+    "live": 600,
+    "epg": 900
+  },
+  "mpv": [
+    "D:\\Program Files (x86)\\mpv-Yaozhi\\Yaoplayer.exe",
+    "D:\\软件\\播放器\\mpv\\mpv.exe",
+    "C:\\Program Files\\mpv\\mpv.exe"
+  ],
+  "mpv_pipe": "\\\\.\\pipe\\iptv-shell",
+  "cache_dir": "%LOCALAPPDATA%\\IPTV外壳",
+  "m3u_path": "",
+  "xmltv_path": "",
+  "vod_m3u": ""
+}

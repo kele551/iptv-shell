@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tv SYSTEM "xmltv.dtd">
+<tv generator-info-name="IPTV外壳模板 示例节目单">
+  <channel id="demo-cctv1"><display-name lang="zh">CCTV-1 演示</display-name></channel>
+  <channel id="demo-hunan"><display-name lang="zh">湖南卫视 演示</display-name></channel>
+  <channel id="demo-local"><display-name lang="zh">本地台 演示</display-name></channel>
+  <programme start="20261121080000 +0800" stop="20261121093000 +0800" channel="demo-cctv1">
+    <title lang="zh">朝闻天下</title>
+  </programme>
+  <programme start="20261121093000 +0800" stop="20261121113000 +0800" channel="demo-cctv1">
+    <title lang="zh">生活圈</title>
+  </programme>
+  <programme start="20261121113000 +0800" stop="20261121130000 +0800" channel="demo-cctv1">
+    <title lang="zh">新闻30分</title>
+  </programme>
+  <programme start="20261121070000 +0800" stop="20261121120000 +0800" channel="demo-hunan">
+    <title lang="zh">早间剧场</title>
+  </programme>
+  <programme start="20261121120000 +0800" stop="20261121140000 +0800" channel="demo-hunan">
+    <title lang="zh">午间新闻</title>
+  </programme>
+  <programme start="20261121090000 +0800" stop="20261121120000 +0800" channel="demo-local">
+    <title lang="zh">本地民生</title>
+  </programme>
+</tv>
