@@ -34,17 +34,19 @@
 <a href="https://github.com/kele551/iptv-shell/issues"><img alt="Issues" src="https://img.shields.io/badge/%F0%9F%90%9E_%E5%8F%8D%E9%A6%88-%E6%8F%90Issue-0969da?style=flat-square&labelColor=3d4552"></a>
 <a href="#sponsor"><img alt="Sponsor" src="https://img.shields.io/badge/%E2%98%95_%E8%B5%9E%E8%B5%8F-%E8%AF%B7%E5%96%9D%E5%92%96%E5%95%A1-ff69b4?style=flat-square&labelColor=3d4552"></a>
 
-<p>📺 <b>IPTV 外壳</b>　·　本机直播台表 + 三色节目单 + 点播海报墙，播放交给本机播放器</p>
+<p>📺 <b>IPTV 外壳</b>　·　把你家的电视频道，搬到电脑上看</p>
 
 <p>作者 <b>海风（kele551）</b>　·　<a href="https://github.com/kele551/iptv-shell">GitHub</a>　·　<a href="https://kele551.github.io/iptv-shell/">官网</a></p>
 </div>
 
 # IPTV 外壳模板（通用版）
 
-一个只在本机跑的小服务：**直播列表 + 节目单三色 + 点播海报墙 + 详情卡 + 一键交本机播放器**。
-界面是现成的，线路数据从 `providers/` 里取 —— **换线路只换一个文件，不改界面、不改服务。**
+**把你家的电视频道，搬到电脑上看。**
 
-默认端口 **8905**。**下载页面上的免安装包，双击 `IPTV-Shell.exe` 就能跑，这台电脑不用装 Python**；只有走源码那条路才需要 Python 3.9 以上（纯标准库，不用装任何依赖）。播放要用本机已装的播放器，mpv / VLC / PotPlayer 任一，没装时网页会提示。
+这是一个装在 Windows 电脑上的 IPTV 播放器界面：家里开通了 IPTV、或手上有能用的频道地址（m3u / xmltv 清单），它就把频道整理成好看的界面——直播台表 + 三色节目单 + 点播海报墙 + 详情卡；点一下，用你电脑上已装的播放器（mpv / VLC / PotPlayer）播出来。
+**它不提供任何频道——频道得是你自己的。** 没开通 IPTV、手上也没清单的话，装上就是空壳，别装。你提供地址，它负责界面。
+
+默认端口 **8905**。**下载免安装包，双击 `IPTV-Shell.exe` 就能跑，这台电脑不用装 Python**；只有走源码那条路才需要 Python 3.9 以上（纯标准库，无依赖）。
 
 ---
 
