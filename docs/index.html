@@ -51,6 +51,21 @@ h1 span{color:var(--sub);font-weight:400}
 .section h2{font-size:34px;letter-spacing:-.6px;margin:0 0 8px}
 .section .sub{color:var(--sub);font-size:16.5px;margin:0 0 30px;max-width:42em}
 
+.notice{background:#fff;border:1px solid var(--line);border-left:4px solid #d9852b;border-radius:14px;padding:24px 26px 20px}
+.notice .nt{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:10px}
+.notice .nt span{font-size:13px;font-weight:700;letter-spacing:.6px;color:#b06a17;background:#fff4e3;border-radius:999px;padding:3px 10px}
+.notice .nt b{font-size:19px;letter-spacing:-.2px}
+.notice p{margin:0;color:var(--sub);font-size:15.5px;line-height:1.8;max-width:60em}
+.notice p b{color:var(--ink)}
+.ncases{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0 14px}
+.nc{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:14px 15px;background:#fcfbf8;font-size:14px;line-height:1.65}
+.nc i{font-style:normal;font-weight:800;font-size:17px;line-height:1.3;flex:none}
+.nc.ok i{color:#16a34a}
+.nc.no i{color:#c2410c;background:#fff1ea;border-radius:8px;width:24px;height:24px;display:grid;place-items:center;margin-top:1px}
+.nc.no{background:#fff8f5;border-color:#f2d9cd}
+.nc b{display:block;color:var(--ink);margin-bottom:2px;font-size:14.5px}
+.nfoot{font-size:15px !important;color:var(--ink) !important;border-top:1px dashed var(--line);padding-top:12px;margin-top:14px !important}
+
 .features{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 .f{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 20px 18px}
 .f .t{font-weight:650;font-size:16px;margin-bottom:6px}
@@ -192,6 +207,19 @@ footer .r{margin-left:auto;color:#9aa0a8;font-size:13px}
   <div class="shot"><img src="img/live.png" alt="直播台表与三色节目单"></div>
 </div></div></section>
 
+<section class="section" id="prereq" style="padding-top:6px"><div class="wrap">
+  <div class="notice">
+    <div class="nt"><span>先确认一件事</span><b>这个外壳不带源。</b></div>
+    <p>它只负责把一份<b>已经能用的线路</b>装进好看的界面，本身<b>不提供任何直播源或点播源</b>。所以先看你在哪种情况：</p>
+    <div class="ncases">
+      <div class="nc ok"><i>✓</i><div><b>家里已开通 IPTV，盒子里本来能看</b><br>把这条线路抓成本机清单接进来，就能用。</div></div>
+      <div class="nc ok"><i>✓</i><div><b>手上已有能用的 m3u / xmltv</b><br>自己整理的、公开合法的、别人给的都算；改两行配置就接上。</div></div>
+      <div class="nc no"><i>×</i><div><b>宽带没开通 IPTV，也没有任何清单</b><br>用不了。装上也是空壳：台表空、点播页签点进去是空态。</div></div>
+    </div>
+    <p class="nfoot">一句话：<b>先有源，再用外壳。</b> 没有源不是「没配好」，是真的没东西可播 —— 这种情况先别装。</p>
+  </div>
+</div></section>
+
 <section class="section" id="features"><div class="wrap">
   <h2>界面是现成的，线路只换一个文件。</h2>
   <p class="sub">不管你用的是哪家宽带，模板只认数据流。有 m3u 清单就改一行配置，一行代码都不用写。</p>
@@ -305,6 +333,9 @@ https://kele551.github.io/iptv-shell/</pre>
 <section class="section" id="faq"><div class="wrap">
   <h2>常见问题</h2>
   <div class="faq" style="margin-top:26px">
+    <details class="q"><summary>宽带没开通 IPTV，能用吗？</summary>
+      <div class="a">不能。外壳不带源，只负责把已经能用的线路装进界面：没有开通、手上也没有能用的清单，
+      装上就是空壳（台表空、点播空态）。想用只有一条路 —— 先有一份自己能用的源。</div></details>
     <details class="q"><summary>换一家宽带还能用吗？</summary>
       <div class="a">模板不认宽带品牌，只认数据流。用你自己那条宽带抓的源就一样能用；
       别人家宽带的源播不了 —— 地址绑出口 IP、授权限本户，换网络直接 403。公开互联网上的公开 m3u 任何宽带都能播。</div></details>
