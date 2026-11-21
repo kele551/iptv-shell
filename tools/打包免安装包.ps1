@@ -36,6 +36,11 @@ $srv = Get-Content "$pkg\_internal\server.py" -Raw -Encoding utf8
 $chk = Get-Content "$pkg\_internal\tools\模板快检.py" -Raw -Encoding utf8
 if ($srv -notmatch "n.startswith\('yaoplayer'\)") { throw "包内 server.py 不是新版本" }
 if ($chk -notmatch "点播放真起播放器") { throw "包内 模板快检.py 不是新版本" }
+# 界面闸门（2026-11-21）：包内 web/index.html 必须与仓库正本逐字节一致，
+# 防止「代码改了、包里还是旧样式」——界面改动曾因部署副本不同步而看不出效果。
+$webSrc = (Get-FileHash "$root\web\index.html" -Algorithm SHA256).Hash
+$webPkg = (Get-FileHash "$pkg\_internal\web\index.html" -Algorithm SHA256).Hash
+if ($webSrc -ne $webPkg) { throw "包内 web/index.html 与仓库正本哈希不一致，禁止打包" }
 
 # 维护脚本不进对外包：发版前快检.py / 打包免安装包.ps1 只在本机维护时用，
 # 含 F:\Harness 绝对路径，打进用户包既无用处又泄露维护结构。
@@ -64,3 +69,4 @@ Copy-Item $zip "$root\docs\download\iptv-shell-Windows.zip" -Force
 "包内 _meta.py: " + (Test-Path "$pkg\_internal\providers\_meta.py")
 "包内 server.py 含修复: True"
 "包内 快检含新项: True"
+"包内 界面与正本一致: True (SHA256 $webSrc)"

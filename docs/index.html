@@ -8,170 +8,188 @@
 <title>IPTV 外壳 · 把你家的电视频道搬到电脑上看</title>
 <meta name="description" content="IPTV 外壳：把你家的电视频道搬到电脑上看。你提供频道地址（m3u / xmltv），它给你好看的直播台表、三色节目单、点播海报墙，点一下交给本机播放器。它不提供频道——没源别装。复制一句给智能体，它自己找源接好。">
 <style>
-:root{
-  --ink:#14161a; --sub:#5b616b; --line:#e6e2db; --bg:#fbfaf7; --card:#fff;
-  --blue:#1f5fd0; --soft:#f2efea; --ok:#1d7a4f;
-}
 *{box-sizing:border-box}
+:root{
+  --bg:#0c1220; --bg-1:#111a2b; --bg-2:#18243a; --bg-3:#22314c; --bg-deep:#080d16;
+  --line:#22314c; --line-soft:#18243a;
+  --ink:#f2f7ff; --ink-2:#c2d1e8; --ink-3:#91a3c0; --ink-4:#647690;
+  --blue:#4c9aff; --blue-deep:#1f6feb; --green:#6ee7a8; --amber:#e3b341; --red:#e5484d;
+  --fs-xs:12px; --lh-xs:16px; --fs-sm:14px; --lh-sm:20px; --fs-base:16px; --lh-base:24px;
+  --fs-lg:18px; --lh-lg:28px; --fs-xl:20px; --lh-xl:28px; --fs-2xl:24px; --lh-2xl:32px;
+  --fs-3xl:30px; --lh-3xl:36px; --fs-5xl:48px; --lh-5xl:48px;
+  --sp-50:4px; --sp-75:8px; --sp-100:12px; --sp-200:16px; --sp-300:24px; --sp-400:32px;
+  --sp-500:40px; --sp-600:48px; --sp-800:80px;
+  --r-sm:4px; --r-md:8px; --r-lg:12px; --r-xl:16px; --r-full:999px;
+  --ease:cubic-bezier(.22,1,.36,1); --dur:300ms; --dur-layout:500ms;
+}
 html,body{margin:0;background:var(--bg);color:var(--ink);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
-  -webkit-font-smoothing:antialiased;line-height:1.65}
+  font-family:"Microsoft YaHei","Segoe UI",-apple-system,"PingFang SC",sans-serif;
+  -webkit-font-smoothing:antialiased;font-size:var(--fs-base);line-height:1.6}
 img{max-width:100%;display:block}
 a{color:inherit;text-decoration:none}
-.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
-nav{position:sticky;top:0;z-index:20;background:rgba(251,250,247,.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
-nav .wrap{display:flex;align-items:center;gap:22px;height:62px}
-.brand{font-weight:700;letter-spacing:.2px}
-.brand i{font-style:normal;color:var(--sub);font-weight:400;margin-left:8px;font-size:14px}
+button,input,textarea{font-family:inherit}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 var(--sp-300)}
+nav{position:sticky;top:0;z-index:20;background:rgba(31,31,31,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;gap:var(--sp-300);height:62px}
+.brand{font-size:var(--fs-base);line-height:var(--lh-base);font-weight:600;letter-spacing:0}
+.brand i{font-style:normal;color:var(--ink-3);font-weight:400;margin-left:var(--sp-100);font-size:var(--fs-sm)}
 nav .sp{margin-left:auto}
-nav a.n{font-size:14.5px;color:var(--sub)}
+nav a.n{font-size:var(--fs-sm);line-height:var(--lh-sm);color:var(--ink-3);transition:color var(--dur) var(--ease)}
 nav a.n:hover{color:var(--ink)}
-.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;
-  color:var(--ink);border-radius:999px;padding:9px 18px;font-size:14px;cursor:pointer;transition:.15s}
-.btn:hover{border-color:#cfc8bd;transform:translateY(-1px)}
-.btn.pri{background:var(--ink);color:#fff;border-color:var(--ink)}
-.btn.pri:hover{background:#000}
-.btn.small{padding:6px 13px;font-size:13px}
+.btn{display:inline-flex;align-items:center;gap:var(--sp-100);border:1px solid var(--bg-3);background:var(--bg-2);
+  color:var(--ink);border-radius:var(--r-md);padding:var(--sp-100) var(--sp-200);font-size:var(--fs-base);line-height:var(--lh-base);font-weight:600;cursor:pointer;transition:background-color var(--dur) var(--ease),transform var(--dur) var(--ease),border-color var(--dur) var(--ease)}
+.btn:hover{background:var(--bg-3);transform:translateY(-2px)}
+.btn:active{transform:scale(.98)}
+.btn.quiet{background:transparent;border-color:var(--bg-3);color:var(--ink-3);font-weight:400}
+.btn.quiet:hover{color:#fff;border-color:var(--ink-4)}
+.btn.pri{background:var(--blue);color:#fff;border-color:var(--blue);padding:var(--sp-200) var(--sp-300)}
+.btn.pri:hover{background:#6aabff}
+.btn.small{padding:var(--sp-75) var(--sp-100);font-size:var(--fs-sm)}
 
-.hero{padding:74px 0 30px}
-.hero .grid{display:grid;grid-template-columns:1.02fr .98fr;gap:52px;align-items:center}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--sub);
-  background:#f1eee8;border:1px solid var(--line);border-radius:999px;padding:5px 12px}
-h1{font-size:clamp(34px,3.6vw,52px);line-height:1.12;letter-spacing:-1px;margin:20px 0 14px;font-weight:750}
-h1 span{color:var(--sub);font-weight:400}
-.lede{font-size:19px;color:var(--sub);max-width:30em;margin:0 0 26px}
+.hero{padding:var(--sp-600) 0 var(--sp-400)}
+.hero .grid{display:grid;grid-template-columns:1.02fr .98fr;gap:var(--sp-600);align-items:center}
+.eyebrow{display:inline-flex;align-items:center;gap:var(--sp-100);font-size:var(--fs-xs);line-height:var(--lh-xs);color:var(--ink-3);
+  background:var(--bg-1);border:1px solid var(--line);border-radius:var(--r-full);padding:var(--sp-75) var(--sp-200)}
+h1{font-size:var(--fs-5xl);line-height:var(--lh-5xl);letter-spacing:-1px;margin:var(--sp-300) 0 var(--sp-200);font-weight:600;
+  background:linear-gradient(90deg,#fff,#9b9b9b);-webkit-background-clip:text;background-clip:text;color:transparent}
+h1 span{font-weight:400;color:#b8b8b8;-webkit-text-fill-color:#b8b8b8;background:none}
+.lede{font-size:var(--fs-lg);line-height:var(--lh-lg);color:var(--ink-3);max-width:30em;margin:0 0 var(--sp-300)}
 .lede b{color:var(--ink);font-weight:600}
-.hero .acts{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-.hero .badges{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:24px;opacity:.95}
+.hero .acts{display:flex;gap:var(--sp-200);flex-wrap:wrap;align-items:center}
+.hero .badges{display:flex;gap:var(--sp-75);flex-wrap:wrap;align-items:center;margin-top:var(--sp-300);opacity:.95}
 .hero .badges img{height:22px;width:auto;display:block}
 .hero .badges a{line-height:0}
-.hero .shot{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#0d1219;
-  box-shadow:0 24px 60px -28px rgba(20,22,26,.42)}
+.hero .shot{border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:var(--bg-deep)}
 .hero .shot img{width:100%}
 
-.section{padding:64px 0;border-top:1px solid var(--line)}
-.section h2{font-size:34px;letter-spacing:-.6px;margin:0 0 8px}
-.section .sub{color:var(--sub);font-size:16.5px;margin:0 0 30px;max-width:42em}
+.section{padding:var(--sp-800) 0;border-top:1px solid var(--line)}
+.section h2{font-size:var(--fs-3xl);line-height:var(--lh-3xl);letter-spacing:0;margin:0 0 var(--sp-100);font-weight:600}
+.section .sub{color:var(--ink-3);font-size:var(--fs-lg);line-height:var(--lh-lg);margin:0 0 var(--sp-400);max-width:42em}
 
-.notice{background:#fff;border:1px solid var(--line);border-left:4px solid #d9852b;border-radius:14px;padding:24px 26px 20px}
-.notice .nt{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:10px}
-.notice .nt span{font-size:13px;font-weight:700;letter-spacing:.6px;color:#b06a17;background:#fff4e3;border-radius:999px;padding:3px 10px}
-.notice .nt b{font-size:19px;letter-spacing:-.2px}
-.notice p{margin:0;color:var(--sub);font-size:15.5px;line-height:1.8;max-width:60em}
+.notice{background:var(--bg-1);border:1px solid var(--line);border-left:4px solid var(--amber);border-radius:var(--r-lg);padding:var(--sp-300)}
+.notice .nt{display:flex;gap:var(--sp-100);align-items:baseline;flex-wrap:wrap;margin-bottom:var(--sp-100)}
+.notice .nt span{font-size:var(--fs-xs);line-height:var(--lh-xs);font-weight:600;color:var(--amber);background:var(--bg-2);border-radius:var(--r-full);padding:var(--sp-50) var(--sp-100)}
+.notice .nt b{font-size:var(--fs-xl);line-height:var(--lh-xl);font-weight:600}
+.notice p{margin:0;color:var(--ink-3);font-size:var(--fs-sm);line-height:1.8;max-width:60em}
 .notice p b{color:var(--ink)}
-.ncases{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0 14px}
-.nc{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:14px 15px;background:#fcfbf8;font-size:14px;line-height:1.65}
-.nc i{font-style:normal;font-weight:800;font-size:17px;line-height:1.3;flex:none}
-.nc.ok i{color:#16a34a}
-.nc.no i{color:#c2410c;background:#fff1ea;border-radius:8px;width:24px;height:24px;display:grid;place-items:center;margin-top:1px}
-.nc.no{background:#fff8f5;border-color:#f2d9cd}
-.nc b{display:block;color:var(--ink);margin-bottom:2px;font-size:14.5px}
-.nfoot{font-size:15px !important;color:var(--ink) !important;border-top:1px dashed var(--line);padding-top:12px;margin-top:14px !important}
+.ncases{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-100);margin:var(--sp-200) 0}
+.nc{display:flex;gap:var(--sp-100);align-items:flex-start;border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-200);background:var(--bg);font-size:var(--fs-sm);line-height:1.7}
+.nc i{font-style:normal;font-weight:600;font-size:var(--fs-base);line-height:1.3;flex:none}
+.nc.ok i{color:var(--green)}
+.nc.no i{color:var(--red);background:var(--bg-2);border-radius:var(--r-md);width:24px;height:24px;display:grid;place-items:center;margin-top:var(--sp-50)}
+.nc.no{background:var(--bg-deep);border-color:var(--bg-3)}
+.nc b{display:block;color:var(--ink);margin-bottom:var(--sp-50);font-size:var(--fs-sm)}
+.nfoot{font-size:var(--fs-sm)!important;color:var(--ink-2)!important;border-top:1px dashed var(--line);padding-top:var(--sp-200);margin-top:var(--sp-200)!important}
 
-.features{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.f{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 20px 18px}
-.f .t{font-weight:650;font-size:16px;margin-bottom:6px}
-.f .d{font-size:14px;color:var(--sub);line-height:1.7}
-.f .k{font-size:12.5px;color:#9aa0a8;margin-bottom:10px;letter-spacing:.4px}
+.features{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-200)}
+.f{background:var(--bg-1);border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--sp-300);transition:transform var(--dur-layout) var(--ease),border-color var(--dur) var(--ease)}
+.f:hover{transform:translateY(-3px);border-color:var(--blue)}
+.f .t{font-weight:600;font-size:var(--fs-base);line-height:var(--lh-base);margin-bottom:var(--sp-75)}
+.f .d{font-size:var(--fs-sm);line-height:1.7;color:var(--ink-3)}
+.f .k{font-size:var(--fs-xs);line-height:var(--lh-xs);color:var(--ink-4);margin-bottom:var(--sp-100);letter-spacing:1px}
 
-.gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
-.g{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#0d1219}
+.gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-200)}
+.g{border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:var(--bg-deep)}
 .g img{width:100%}
-.g .cap{padding:10px 14px;font-size:13px;color:var(--sub);background:#fff;border-top:1px solid var(--line)}
+.g .cap{padding:var(--sp-100) var(--sp-200);font-size:var(--fs-xs);line-height:var(--lh-xs);color:var(--ink-3);background:var(--bg-1);border-top:1px solid var(--line)}
 
-/* 三步安装 */
-.steps{counter-reset:s;display:grid;gap:14px}
-.step{display:grid;grid-template-columns:44px 1fr;gap:16px;background:var(--card);border:1px solid var(--line);
-  border-radius:14px;padding:20px 22px}
-.step .n{counter-increment:s;display:grid;place-items:center;width:34px;height:34px;border-radius:999px;
-  background:var(--ink);color:#fff;font-size:14px;font-weight:650}
-.step .t{font-weight:650;margin-bottom:4px}
-.step .d{color:var(--sub);font-size:14.5px}
-.step code{background:var(--soft);border:1px solid var(--line);border-radius:7px;padding:2px 7px;font-size:13px;
+.steps{counter-reset:s;display:grid;gap:var(--sp-200)}
+.step{display:grid;grid-template-columns:44px 1fr;gap:var(--sp-200);background:var(--bg-1);border:1px solid var(--line);
+  border-radius:var(--r-lg);padding:var(--sp-300)}
+.step .n{counter-increment:s;display:grid;place-items:center;width:34px;height:34px;border-radius:var(--r-full);
+  background:var(--blue);color:#fff;font-size:var(--fs-sm);font-weight:600}
+.step .t{font-weight:600;margin-bottom:var(--sp-50)}
+.step .d{color:var(--ink-3);font-size:var(--fs-sm)}
+.step code{background:var(--bg-2);border:1px solid var(--bg-3);border-radius:var(--r-sm);padding:var(--sp-50) var(--sp-100);font-size:var(--fs-xs);
   font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 
-/* 智能体卡片 */
-.agentbox{background:#101720;color:#dfe8f3;border-radius:18px;padding:28px 30px;border:1px solid #1d2a3a}
-.agentbox h3{margin:0 0 6px;font-size:23px;color:#fff}
-.agentbox p{margin:0 0 16px;color:#93a4b8;font-size:14.5px}
-.agentbox textarea{width:100%;height:186px;background:#0a1017;color:#d6e2ee;border:1px solid #22303f;
-  border-radius:12px;padding:14px 16px;font-size:14px;line-height:1.8;resize:vertical;
-  font-family:inherit}
-.agentbox .row{display:flex;gap:12px;align-items:center;margin-top:14px;flex-wrap:wrap}
-.agentbox .btn{background:#1d5fd0;border-color:#1d5fd0;color:#fff}
-.agentbox .btn:hover{background:#2a6ee0}
-.agentbox .hint{font-size:13px;color:#7f91a8}
+.agentbox{background:var(--bg-deep);color:var(--ink-2);border-radius:var(--r-xl);padding:var(--sp-400);border:1px solid var(--bg-3)}
+.agentbox h3{margin:0 0 var(--sp-75);font-size:var(--fs-2xl);line-height:var(--lh-2xl);color:#fff;font-weight:600}
+.agentbox p{margin:0 0 var(--sp-200);color:var(--ink-3);font-size:var(--fs-sm);line-height:var(--lh-sm)}
+.agentbox textarea{width:100%;height:186px;background:var(--bg);color:var(--ink-2);border:1px solid var(--bg-3);
+  border-radius:var(--r-md);padding:var(--sp-200);font-size:var(--fs-sm);line-height:1.8;resize:vertical}
+.agentbox .row{display:flex;gap:var(--sp-200);align-items:center;margin-top:var(--sp-200);flex-wrap:wrap}
+.agentbox .btn{background:var(--blue);border-color:var(--blue);color:#fff}
+.agentbox .btn:hover{background:#6aabff}
+.agentbox .hint{font-size:var(--fs-xs);color:var(--ink-4)}
 
-/* FAQ */
-.faq{display:grid;gap:10px}
-.q{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:0}
-.q summary{cursor:pointer;padding:16px 20px;font-weight:650;font-size:15px;list-style:none}
+.faq{display:grid;gap:var(--sp-100)}
+.q{background:var(--bg-1);border:1px solid var(--line);border-radius:var(--r-md);padding:0}
+.q summary{cursor:pointer;padding:var(--sp-200) var(--sp-300);font-weight:600;font-size:var(--fs-base);line-height:var(--lh-base);list-style:none}
 .q summary::-webkit-details-marker{display:none}
-.q summary::after{content:"＋";float:right;color:var(--sub);font-weight:400}
+.q summary::after{content:"＋";float:right;color:var(--ink-3);font-weight:400}
 .q[open] summary::after{content:"－"}
-.q .a{padding:0 20px 18px;color:var(--sub);font-size:14.5px}
+.q .a{padding:0 var(--sp-300) var(--sp-200);color:var(--ink-3);font-size:var(--fs-sm);line-height:1.7}
 
-table{width:100%;border-collapse:collapse;font-size:14.5px;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
-th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line)}
-th{background:#f4f1ec;font-weight:650;font-size:13.5px;color:#3d434c}
-td{color:var(--sub)}
+table{width:100%;border-collapse:collapse;font-size:var(--fs-sm);background:var(--bg-1);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden}
+th,td{padding:var(--sp-100) var(--sp-200);text-align:left;border-bottom:1px solid var(--line)}
+th{background:var(--bg-2);font-weight:600;font-size:var(--fs-xs);color:var(--ink-2)}
+td{color:var(--ink-3)}
 td b{color:var(--ink)}
 
-/* 安装：深色面板（参照 Aerial 的 tab + 代码框做法） */
-.install{background:#0a0c0f;color:#e9eef4;padding:66px 0 74px;border-top:1px solid #1c2026}
+.install{background:var(--bg-deep);color:var(--ink-2);padding:var(--sp-800) 0;border-top:1px solid var(--line)}
 .install .wrap{max-width:1010px}
-.in-head{display:flex;align-items:center;gap:16px;margin-bottom:8px}
-.install h2{color:#fff;margin:0;font-size:32px;letter-spacing:-.4px}
-.in-sub{color:#98a4b1;font-size:15px;margin:8px 0 22px;max-width:44em}
-.in-note{color:#7f8b98;font-size:13.5px;margin:14px 0 0}
-.tabs2{display:inline-flex;gap:4px;background:#12161b;border:1px solid #232a33;border-radius:12px;padding:5px;margin:6px 0 24px;flex-wrap:wrap}
-.tabs2 button{border:0;background:transparent;color:#98a4b1;padding:9px 18px;border-radius:9px;font-size:14.5px;cursor:pointer;font-family:inherit}
-.tabs2 button.on{background:#fff;color:#0b0d10;font-weight:650}
+.in-head{display:flex;align-items:center;gap:var(--sp-200);margin-bottom:var(--sp-100)}
+.install h2{color:#fff;margin:0;font-size:var(--fs-3xl);line-height:var(--lh-3xl);font-weight:600}
+.in-sub{color:var(--ink-3);font-size:var(--fs-sm);line-height:var(--lh-sm);margin:var(--sp-100) 0 var(--sp-300);max-width:44em}
+.in-note{color:var(--ink-4);font-size:var(--fs-xs);margin:var(--sp-200) 0 0}
+.tabs2{display:inline-flex;gap:var(--sp-50);background:var(--bg);border:1px solid var(--bg-3);border-radius:var(--r-md);padding:var(--sp-75);margin:var(--sp-75) 0 var(--sp-300);flex-wrap:wrap}
+.tabs2 button{border:0;background:transparent;color:var(--ink-3);padding:var(--sp-100) var(--sp-200);border-radius:var(--r-sm);font-size:var(--fs-sm);line-height:var(--lh-sm);font-weight:500;cursor:pointer;transition:background-color var(--dur) var(--ease),color var(--dur) var(--ease),transform var(--dur) var(--ease)}
+.tabs2 button:hover{background:var(--bg-2);color:var(--ink)}
+.tabs2 button:active{transform:scale(.98)}
+.tabs2 button.on{background:var(--blue);color:#fff}
 .pane{display:none}
 .pane.on{display:block}
-.chips{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0 6px}
-.chip{display:inline-flex;align-items:center;gap:9px;border:1px solid #262d36;background:#101419;border-radius:999px;padding:7px 15px;font-size:14px;color:#dee6ef}
-.chip i{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:12px;font-style:normal;font-weight:700;color:#fff}
-.codebox{position:relative;background:#11151a;border:1px solid #262d36;border-radius:14px;padding:22px 26px 22px 24px;margin-top:12px}
+.chips{display:flex;gap:var(--sp-100);flex-wrap:wrap;margin:var(--sp-50) 0}
+.chip{display:inline-flex;align-items:center;gap:var(--sp-100);border:1px solid var(--bg-3);background:var(--bg);border-radius:var(--r-full);padding:var(--sp-75) var(--sp-200);font-size:var(--fs-sm);color:var(--ink-2)}
+.chip i{width:22px;height:22px;border-radius:var(--r-sm);display:grid;place-items:center;font-size:var(--fs-xs);font-style:normal;font-weight:600;color:#fff}
+.codebox{position:relative;background:var(--bg);border:1px solid var(--bg-3);border-radius:var(--r-lg);padding:var(--sp-300);margin-top:var(--sp-100)}
 .codebox pre{margin:0;white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  font-size:14.5px;line-height:1.95;color:#ccd6e2;padding-right:86px}
-.codebox .cp{position:absolute;right:14px;top:14px;background:#1d242d;border:1px solid #2d3641;color:#e3eaf2;
-  border-radius:8px;padding:6px 14px;font-size:13.5px;cursor:pointer;font-family:inherit}
-.codebox .cp:hover{background:#26303b}
-.install code{background:#1a2028;border:1px solid #29313b;border-radius:6px;padding:1px 6px;font-size:13px;
-  font-family:ui-monospace,Menlo,Consolas,monospace;color:#cfe0f5}
-.steps2{display:grid;gap:12px;margin-top:8px}
-.s2{display:grid;grid-template-columns:34px 1fr;gap:14px;background:#11151a;border:1px solid #262d36;
-  border-radius:12px;padding:18px 20px}
-.s2>span{width:30px;height:30px;border-radius:999px;background:#fff;color:#0b0d10;display:grid;place-items:center;
-  font-weight:700;font-size:13.5px}
-.s2 b{color:#fff;font-weight:650}
-.s2 div{color:#a9b5c2;font-size:14px;line-height:1.8}
-.install .row{display:flex;gap:12px;flex-wrap:wrap}
-.install .btn{background:#1d242d;border-color:#2d3641;color:#e9eef4}
-.install .btn:hover{background:#26303b;border-color:#3a4652}
+  font-size:var(--fs-sm);line-height:1.9;color:var(--ink-2);padding-right:86px}
+.codebox .cp{position:absolute;right:var(--sp-200);top:var(--sp-200);background:var(--bg-2);border:1px solid var(--bg-3);color:var(--ink-2);
+  border-radius:var(--r-md);padding:var(--sp-75) var(--sp-200);font-size:var(--fs-xs);cursor:pointer;transition:background-color var(--dur) var(--ease),transform var(--dur) var(--ease)}
+.codebox .cp:hover{background:var(--bg-3);color:#fff}
+.codebox .cp:active{transform:scale(.98)}
+.install code{background:var(--bg-2);border:1px solid var(--bg-3);border-radius:var(--r-sm);padding:var(--sp-50) var(--sp-75);font-size:var(--fs-xs);
+  font-family:ui-monospace,Menlo,Consolas,monospace;color:#a9d2ff}
+.steps2{display:grid;gap:var(--sp-100);margin-top:var(--sp-100)}
+.s2{display:grid;grid-template-columns:34px 1fr;gap:var(--sp-200);background:var(--bg);border:1px solid var(--bg-3);
+  border-radius:var(--r-md);padding:var(--sp-300)}
+.s2>span{width:30px;height:30px;border-radius:var(--r-full);background:var(--blue);color:#fff;display:grid;place-items:center;
+  font-weight:600;font-size:var(--fs-xs)}
+.s2 b{color:#fff;font-weight:600}
+.s2 div{color:var(--ink-3);font-size:var(--fs-sm);line-height:1.8}
+.install .row{display:flex;gap:var(--sp-200);flex-wrap:wrap}
+.install .btn{background:var(--bg-2);border-color:var(--bg-3);color:var(--ink-2)}
+.install .btn:hover{background:var(--bg-3);border-color:var(--ink-4)}
 
-.sponsor{padding:60px 0 54px;border-top:1px solid var(--line);text-align:center}
-.sponsor h2{font-size:30px;letter-spacing:-.5px;margin:0 0 8px}
-.sponsor .spsub{color:var(--sub);font-size:16px;margin:0 0 26px}
-.sponsor .qrbox{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 16px 10px;box-shadow:0 10px 30px rgba(20,22,26,.06)}
-.sponsor .qrbox img{display:block;border-radius:8px}
-.sponsor .qrt{font-size:13px;color:var(--sub);margin-top:8px}
-.sponsor .spnote{color:#6d7480;font-size:14px;margin:18px 0 0}
+.sponsor{padding:var(--sp-600) 0 var(--sp-500);border-top:1px solid var(--line);text-align:center}
+.sponsor h2{font-size:var(--fs-xl);line-height:var(--lh-xl);font-weight:600;margin:0 0 var(--sp-100)}
+.sponsor .spsub{color:var(--ink-3);font-size:var(--fs-base);line-height:var(--lh-base);margin:0 0 var(--sp-300)}
+.sponsor .qrbox{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--sp-200) var(--sp-200) var(--sp-100)}
+.sponsor .qrbox img{display:block;border-radius:var(--r-md)}
+.sponsor .qrt{font-size:var(--fs-xs);color:var(--ink-3);margin-top:var(--sp-100)}
+.sponsor .spnote{color:var(--ink-4);font-size:var(--fs-sm);margin:var(--sp-200) 0 0}
 
-footer{padding:44px 0 70px;border-top:1px solid var(--line);color:var(--sub);font-size:14px}
-footer .row{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
-footer .r{margin-left:auto;color:#9aa0a8;font-size:13px}
-.toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,20px);background:#14161a;color:#fff;
-  padding:11px 20px;border-radius:999px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:40}
+footer{padding:var(--sp-500) 0 var(--sp-800);border-top:1px solid var(--line);color:var(--ink-3);font-size:var(--fs-sm)}
+footer .row{display:flex;gap:var(--sp-300);flex-wrap:wrap;align-items:center}
+footer .r{margin-left:auto;color:var(--ink-4);font-size:var(--fs-xs)}
+.toast{position:fixed;left:50%;bottom:var(--sp-400);transform:translate(-50%,8px);background:var(--blue);color:#fff;
+  padding:var(--sp-100) var(--sp-300);border-radius:var(--r-full);font-size:var(--fs-sm);line-height:var(--lh-sm);opacity:0;transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease);pointer-events:none;z-index:40}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 @media(max-width:920px){
-  h1{font-size:42px}
-  .hero .grid{grid-template-columns:1fr;gap:30px}
+  h1{font-size:var(--fs-3xl);line-height:var(--lh-3xl)}
+  .hero .grid{grid-template-columns:1fr;gap:var(--sp-400)}
   .features{grid-template-columns:repeat(2,1fr)}
   .gallery{grid-template-columns:1fr}
+  .ncases{grid-template-columns:1fr}
 }
-@media(max-width:600px){.features{grid-template-columns:1fr} h1{font-size:34px} .section h2{font-size:26px}}
+@media(max-width:600px){nav .wrap{gap:var(--sp-200)}nav a.n{display:none}nav a.btn.small{padding:var(--sp-50) var(--sp-100);font-size:var(--fs-xs)}.hero .acts{gap:var(--sp-100)}.features{grid-template-columns:1fr} h1{font-size:var(--fs-2xl);line-height:var(--lh-2xl)} .section h2{font-size:var(--fs-xl);line-height:var(--lh-xl)}}
+@media (prefers-reduced-motion:reduce){
+  *{transition-duration:0ms!important;animation-duration:0ms!important}
+  .btn:hover,.f:hover{transform:none}
+}
 </style>
 </head>
 <body>
@@ -197,11 +215,11 @@ footer .r{margin-left:auto;color:#9aa0a8;font-size:13px}
     <p class="lede">这是一个装在 Windows 电脑上的 IPTV 播放器界面：家里开通了 IPTV、或手上有能用的 m3u / xmltv 清单，它就整理成<b>直播台表 + 三色节目单 + 点播海报墙</b>，点一下交给<b>你已装的播放器</b>（mpv / VLC / PotPlayer）播放。<b>它不提供频道——频道得你自己的。</b></p>
     <div class="acts">
       <a class="btn pri" href="download/iptv-shell-Windows.zip">⬇ 下载免安装包 · 8.4 MB</a>
-      <a class="btn" href="https://github.com/kele551/iptv-shell/releases/latest/download/iptv-shell-Windows.zip" target="_blank" rel="noopener">备用下载</a>
-      <button class="btn" id="copyTop">复制给智能体的一句话</button>
-      <a class="btn" href="https://github.com/kele551/iptv-shell" target="_blank" rel="noopener">看源码</a>
+      <a class="btn quiet" href="https://github.com/kele551/iptv-shell/releases/latest/download/iptv-shell-Windows.zip" target="_blank" rel="noopener">备用下载</a>
+      <button class="btn quiet" id="copyTop">复制给智能体的一句话</button>
+      <a class="btn quiet" href="https://github.com/kele551/iptv-shell" target="_blank" rel="noopener">看源码</a>
     </div>
-    <p class="lede" style="margin-top:14px;font-size:14px">下载的是 <b>Windows 免安装包</b>：解压到 D:\Program Files\IPTV外壳（没有就新建），桌面只留图标，双击 <b>IPTV-Shell.exe</b> 就能跑，<b>这台电脑不用装 Python</b>。只有走源码那条路才需要 Python 3.9+。</p>
+    <p class="lede" style="margin-top:var(--sp-200);font-size:var(--fs-sm)">下载的是 <b>Windows 免安装包</b>：解压到 D:\Program Files\IPTV外壳（没有就新建），桌面只留图标，双击 <b>IPTV-Shell.exe</b> 就能跑，<b>这台电脑不用装 Python</b>。只有走源码那条路才需要 Python 3.9+。</p>
     <div class="badges">
       <a href="https://github.com/kele551/iptv-shell/releases/latest" target="_blank" rel="noopener"><img alt="Downloads" src="https://img.shields.io/github/downloads/kele551/iptv-shell/total?style=flat-square&label=downloads&color=1f5fd0&x=1"></a>
       <a href="https://hits.sh/github.com/kele551/iptv-shell/" target="_blank" rel="noopener"><img alt="浏览量" src="https://hits.sh/github.com/kele551/iptv-shell.svg?label=views&color=1f5fd0" onerror="this.onerror=null;this.src='https://api.visitorbadge.io/api/visitors?path=kele551.iptv-shell&label=%E6%B5%8F%E8%A7%88%E9%87%8F&countColor=%231f5fd0&style=flat-square'"></a>
@@ -219,7 +237,7 @@ footer .r{margin-left:auto;color:#9aa0a8;font-size:13px}
   <div class="shot"><img src="img/live.png" alt="直播台表与三色节目单"></div>
 </div></div></section>
 
-<section class="section" id="prereq" style="padding-top:6px"><div class="wrap">
+<section class="section" id="prereq" style="padding-top:var(--sp-75)"><div class="wrap">
   <div class="notice">
     <div class="nt"><span>先确认一件事</span><b>这个外壳不带源。</b></div>
     <p>它只负责把一份<b>已经能用的线路</b>装进好看的界面，本身<b>不提供任何直播源或点播源</b>。所以先看你在哪种情况：</p>
@@ -354,7 +372,7 @@ https://kele551.github.io/iptv-shell/</pre>
     </div>
   </div>
 
-  <h2 style="margin-top:52px;font-size:26px">它到底会做什么</h2>
+  <h2 style="margin-top:var(--sp-600);font-size:var(--fs-2xl)">它到底会做什么</h2>
   <table>
     <tr><th style="width:34%">步骤</th><th>做什么</th></tr>
     <tr><td><b>探路</b></td><td>扫本机在跑的服务、磁盘上的 m3u / xmltv、旧的 IPTV 项目，把能用的数据流列出来</td></tr>
