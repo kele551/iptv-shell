@@ -71,9 +71,9 @@
 
 第 0 步先拿东西：如果这台电脑上已经有 IPTV 外壳的项目目录，就直接用；没有就从 https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip 下载免安装包（这个地址连不上就换 https://github.com/kele551/iptv-shell/releases/latest/download/iptv-shell-Windows.zip），解压到 D:\Program Files\IPTV外壳（没有就新建这个目录；别解压到桌面，桌面只留图标），会得到一个 IPTV-Shell 文件夹，里面的 IPTV-Shell.exe 双击就能跑，这台电脑不用装 Python。
 
-然后按这个顺序做：跑 IPTV-Shell.exe probe（这个 exe 没有控制台窗口，结果会写到同一个文件夹里的 命令行输出.txt，等它自己跑完再读那个文件），把本机正在跑的服务、磁盘里的 m3u / m3u8 / xmltv 清单、已有的 IPTV 项目都列出来；选一份能用的接进外壳（改 IPTV-Shell 文件夹里的 config.json，或照 _internal\providers\转发示例.py 写一个适配器）；跑 IPTV-Shell.exe check（同样等它跑完、看 命令行输出.txt），出「可以交」才算接好。装好以后桌面会自动出现一个「IPTV外壳」图标，以后双击那个图标就能看（文件夹本身别放桌面）。
+然后按这个顺序做：跑 IPTV-Shell.exe probe（这个 exe 没有控制台窗口，结果会写到同一个文件夹里的 命令行输出.txt，等它自己跑完再读那个文件），把本机正在跑的服务、磁盘里的 m3u / m3u8 / xmltv 清单、已有的 IPTV 项目都列出来；选一份能用的接进外壳（改 IPTV-Shell 文件夹里的 config.json —— 包里只有 config.example.json，第一次运行会自动生成 config.json，没生成就把 config.example.json 复制一份改名成 config.json；也可以照 _internal\providers\转发示例.py 写一个适配器）；跑 IPTV-Shell.exe check（同样等它跑完、看 命令行输出.txt），出「可以交」才算接好。装好以后桌面会自动出现一个「IPTV外壳」图标，以后双击那个图标就能看（文件夹本身别放桌面）。
 
-播放只用这台电脑上装好的播放器（mpv / VLC / PotPlayer 任一），不要内嵌网页播放器，也不要开机自启。要是这台宽带没开通 IPTV、探路也找不到任何清单，就直接告诉我「这条网络没有可用源」，别编假数据、别拿演示数据糊弄我。
+播放只用这台电脑上装好的播放器（mpv / VLC / PotPlayer 任一，Yaoplayer 按 mpv 算），不要内嵌网页播放器，也不要开机自启；点台、换台只许一个播放器窗口，已经在放就复用那个窗口切台，别每点一个台就新开一个播放器。要是这台宽带没开通 IPTV、探路也找不到任何清单，就直接告诉我「这条网络没有可用源」，别编假数据、别拿演示数据糊弄我。
 
 不要把步骤列给我，你自己在这台电脑上执行。最后把 check 的原始输出贴给我，不要只说「成功了」；没通过就说清哪一项没过、卡在哪。
 ```
