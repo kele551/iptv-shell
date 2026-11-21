@@ -13,6 +13,7 @@ config.json 里填：
 """
 import os
 import re
+import sys
 
 NAME = 'm3u 清单'
 DESC = '直接吃现成的 m3u/xmltv 文件，任何线路都能接'
@@ -21,15 +22,46 @@ CAPS = {'live': True, 'vod': True, 'search': True, 'poster': False,
 
 _HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# 线路适配器是按文件单独加载的（不是包），所以同目录的 _meta.py 要手动载一次。
+# 左栏的分类算法只有一份，m3u 与「转发示例」共用，免得各写一份、各漏一处。
+_META = None
+
+
+def _meta():
+    global _META
+    if _META is None:
+        import importlib.util as _iu
+        p = os.path.join(os.path.dirname(os.path.abspath(__file__)), '_meta.py')
+        spec = _iu.spec_from_file_location('iptv_vod_meta', p)
+        m = _iu.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        _META = m
+    return _META
+
+
+def _cfg_paths():
+    """配置一样的顺序：exe 同级 → IPTV_CONFIG → IPTV_BASE → 包内那份。
+    不看外层那份就会出现「照说明改了 config.json 却一直说没配置」的死结。"""
+    out = []
+    if getattr(sys, 'frozen', False):
+        out.append(os.path.join(os.path.dirname(os.path.abspath(sys.executable)), 'config.json'))
+    for k in ('IPTV_CONFIG', 'IPTV_BASE'):
+        v = os.environ.get(k)
+        if v:
+            out.append(v if v.lower().endswith('.json') else os.path.join(v, 'config.json'))
+    out.append(os.path.join(_HERE, 'config.json'))
+    return out
+
 
 def _cfg():
     import json
-    p = os.path.join(_HERE, 'config.json')
-    try:
-        with open(p, encoding='utf-8-sig', errors='ignore') as f:
-            return json.load(f)
-    except Exception:
-        return {}
+    for p in _cfg_paths():
+        try:
+            with open(p, encoding='utf-8-sig', errors='ignore') as f:
+                return json.load(f)
+        except Exception:
+            continue
+    return {}
 
 
 def _paths():
@@ -215,9 +247,10 @@ def vod_meta():
     groups = {}
     for r in rows:
         groups[r['cat']] = groups.get(r['cat'], 0) + 1
+    types, bands, tags = _meta().build_meta(rows)
     return {'total': len(rows), 'groups': groups,
-            'types': dict(groups), 'tags': list(groups.keys()),
-            'bands': {}, 'subs': dict(groups), 'sample': [], 'building': False,
+            'types': types, 'bands': bands, 'tags': tags,
+            'subs': dict(groups), 'sample': [], 'building': False,
             'note': '' if rows else '这条线路没有点播片库（可在 config.json 填 vod_m3u）'}
 
 

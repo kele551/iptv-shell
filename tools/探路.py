@@ -107,6 +107,47 @@ def walk_lists(roots):
     return sorted(found)[:40]
 
 
+def drive_roots(budget=18.0):
+    """盘符浅扫：只认名字里带 iptv / 直播 的目录，最多下探 3 层，带时间预算。
+
+    不扫这一步，用户把线路项目放在 F:\\Harness\\projects 这类地方时，
+    探路就只会看桌面和文档，等于「明明有源却报没有」。
+    """
+    if os.name != 'nt':
+        return []
+    import string
+    import time
+    t0 = time.time()
+    found = []
+    junk = SKIP_DIRS | {'windows', 'program files', 'program files (x86)', 'programdata',
+                        '$recycle.bin', 'system volume information', 'recovery',
+                        'perflogs', 'msocache'}
+    for d in string.ascii_uppercase:
+        root = d + ':\\'
+        if not os.path.isdir(root):
+            continue
+        stack = [(root, 0)]
+        while stack and time.time() - t0 < budget:
+            cur, dep = stack.pop()
+            try:
+                subs = os.listdir(cur)
+            except Exception:
+                continue
+            for s in subs:
+                p = os.path.join(cur, s)
+                if not os.path.isdir(p):
+                    continue
+                low = s.lower()
+                if low in junk or s.startswith('.'):
+                    continue
+                if any(k in low for k in PROJECT_HINTS):
+                    found.append(p)
+                    continue
+                if dep < 2:
+                    stack.append((p, dep + 1))
+    return found[:10]
+
+
 def known_projects(roots):
     """不认死项目名：凡是名字带 iptv/直播、或里面有 直播数据服务.py 的目录都算"""
     out = set()
@@ -156,6 +197,10 @@ def main():
     roots = list(SEARCH_ROOTS)
     extra = [x.strip() for x in (a.roots or os.environ.get('IPTV_SEARCH_ROOTS', '')).split(';') if x.strip()]
     roots.extend(extra)
+    # 盘符浅扫出来的「名字像 IPTV」的目录也加进去，不然后面找不到真实项目
+    for d in drive_roots():
+        if d not in roots:
+            roots.append(d)
     data = {'search_roots': [r for r in roots if os.path.isdir(r)],
             'listening': [], 'playlists': walk_lists(roots),
             'projects': known_projects(roots)}

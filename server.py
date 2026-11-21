@@ -16,6 +16,7 @@
   python server.py --provider mock # 换线路
 """
 import base64
+import glob
 import importlib.util
 import json
 import os
@@ -347,7 +348,15 @@ def build_live_json():
     for g, items in groups.items():
         items.sort(key=lambda x: x['num'])
         out.append({'name': g, 'count': len(items), 'items': items})
-    out.sort(key=lambda x: -x['count'])
+    # 分组顺序：央视类永远排最前，其次省级/卫视，最后按台数从多到少
+    def _rank(name):
+        n = (name or '').upper()
+        if '央视' in n or 'CCTV' in n or '中央' in n:
+            return 0
+        if '省级' in n or '卫视' in n or '省' in n:
+            return 1
+        return 2
+    out.sort(key=lambda x: (_rank(x['name']), -x['count']))
     return {'updated': time.strftime('%H:%M:%S'), 'total': sum(x['count'] for x in out),
             'groups': out}
 
@@ -423,8 +432,13 @@ def build_vod_m3u(host, cat=None):
 
 def _player_kind(exe):
     n = os.path.basename(exe or '').lower()
-    if n.startswith('mpv') or 'yaoplayer' in n:
+    # Yaoplayer / mpv-Atmos 这类「MPV 套壳」不接受 mpv 的 --input-ipc-server /
+    # --no-terminal / --force-window，硬塞会静默退出（点了没窗口）。只把真正的
+    # mpv 当 mpv，套壳一律按「直接喂地址」处理。
+    if n.startswith('mpv') and not n.startswith('mpv-'):
         return 'mpv'
+    if n.startswith('yaoplayer') or n.startswith('mpv-'):
+        return 'other'
     if n.startswith('vlc'):
         return 'vlc'
     if 'potplayer' in n:
@@ -472,6 +486,28 @@ _mpv_lock = threading.Lock()
 _mpv = {'url': ''}
 
 
+def _title_playlist(url, title):
+    """非 mpv 的播放器（Yaoplayer / VLC / PotPlayer…）不给 mpv 那套参数，
+    改成写一个小 m3u 清单喂给它：窗口标题直接就是台名，不再是频道编号。
+    只保留最近一个，别在缓存目录里堆垃圾。"""
+    name = re.sub(r'[\\/:*?"<>|\s]+', '_', (title or '播放')).strip('_')[:40] or '播放'
+    d = os.path.expandvars(CFG.get('cache_dir') or os.path.join(
+        os.environ.get('LOCALAPPDATA', os.path.expanduser('~')), 'IPTV外壳'))
+    try:
+        os.makedirs(d, exist_ok=True)
+        for old in glob.glob(os.path.join(d, '正在播放-*.m3u')):
+            try:
+                os.remove(old)
+            except Exception:
+                pass
+        p = os.path.join(d, '正在播放-%s.m3u' % name)
+        with open(p, 'w', encoding='utf-8') as f:
+            f.write('#EXTM3U\n#EXTINF:-1,%s\n%s\n' % (title or name, url))
+        return p
+    except Exception:
+        return None
+
+
 def _kill_stray():
     """只收拾本服务起的那个窗口，别误伤用户自己开的 MPV"""
     pat = '*127.0.0.1:%d/*' % PORT
@@ -507,8 +543,10 @@ def mpv_play(url, title=''):
                 if title:
                     args.append('--title=' + title)
             else:
-                # VLC / PotPlayer / 其它：直接喂地址，各开一个窗口（不强制单窗口复用）
-                args = [exe, url]
+                # VLC / PotPlayer / Yaoplayer / 其它：给一个带台名的小清单，
+                # 窗口标题就是台名（直接喂地址只会显示频道编号）
+                src = _title_playlist(url, title) or url
+                args = [exe, src]
             subprocess.Popen(args, close_fds=True,
                              creationflags=0x08000000 if os.name == 'nt' else 0)
             _mpv['url'] = url if kind == 'mpv' else ''
@@ -732,7 +770,11 @@ class Handler(BaseHTTPRequestHandler):
             self._send(404, 'not found: %s' % e)
         except Exception as e:
             log('请求失败 %s -> %s' % (path, e))
-            self._send(502, 'provider error: %s' % e)
+            # /api/ 一律回 JSON，别回一段纯文本让人解析崩掉（快检和网页都靠它）
+            if path.startswith('/api/'):
+                self._json({'error': 'provider error: %s' % e, 'items': [], 'total': 0}, 502)
+            else:
+                self._send(502, 'provider error: %s' % e)
 
 
 def lan_ip():

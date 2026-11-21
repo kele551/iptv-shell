@@ -69,9 +69,9 @@
 ```
 请帮我把这个 IPTV 外壳装到你这台电脑上，再接上这台电脑所在的网络。
 
-第 0 步先拿东西：如果这台电脑上已经有 IPTV 外壳的项目目录，就直接用；没有就从 https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip 下载免安装包（这个地址连不上就换 https://github.com/kele551/iptv-shell/releases/download/v1.0/iptv-shell-Windows.zip），解压到桌面，会得到一个 IPTV-Shell 文件夹，里面的 IPTV-Shell.exe 双击就能跑，这台电脑不用装 Python。
+第 0 步先拿东西：如果这台电脑上已经有 IPTV 外壳的项目目录，就直接用；没有就从 https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip 下载免安装包（这个地址连不上就换 https://github.com/kele551/iptv-shell/releases/download/v1.0/iptv-shell-Windows.zip），解压到 D:\Program Files\IPTV外壳（没有就新建这个目录；别解压到桌面，桌面只留图标），会得到一个 IPTV-Shell 文件夹，里面的 IPTV-Shell.exe 双击就能跑，这台电脑不用装 Python。
 
-然后按这个顺序做：跑 IPTV-Shell.exe probe，把本机正在跑的服务、磁盘里的 m3u / m3u8 / xmltv 清单、已有的 IPTV 项目都列出来；选一份能用的接进外壳（改 IPTV-Shell 文件夹里的 config.json，或照 _internal\providers\转发示例.py 写一个适配器）；跑 IPTV-Shell.exe check，出「可以交」才算接好。想放到桌面就保持 IPTV-Shell 文件夹在桌面，以后双击 IPTV-Shell.exe 就能看。
+然后按这个顺序做：跑 IPTV-Shell.exe probe（这个 exe 没有控制台窗口，结果会写到同一个文件夹里的 命令行输出.txt，等它自己跑完再读那个文件），把本机正在跑的服务、磁盘里的 m3u / m3u8 / xmltv 清单、已有的 IPTV 项目都列出来；选一份能用的接进外壳（改 IPTV-Shell 文件夹里的 config.json，或照 _internal\providers\转发示例.py 写一个适配器）；跑 IPTV-Shell.exe check（同样等它跑完、看 命令行输出.txt），出「可以交」才算接好。装好以后桌面会自动出现一个「IPTV外壳」图标，以后双击那个图标就能看（文件夹本身别放桌面）。
 
 播放只用这台电脑上装好的播放器（mpv / VLC / PotPlayer 任一），不要内嵌网页播放器，也不要开机自启。要是这台宽带没开通 IPTV、探路也找不到任何清单，就直接告诉我「这条网络没有可用源」，别编假数据、别拿演示数据糊弄我。
 
@@ -82,11 +82,11 @@
 
 ## 智能体要照这个顺序做
 
-0. **先确认东西在哪** —— 用户机器上有没有这个目录。没有就下免安装包（见上面「先拿东西」）解压到桌面，**别反问用户要地址、别自己编一个下载地址**；
+0. **先确认东西在哪** —— 用户机器上有没有这个目录。没有就下免安装包（见上面「先拿东西」）解压到 D:\Program Files\IPTV外壳（没有就新建），桌面只留图标，**别反问用户要地址、别自己编一个下载地址**；
 1. `IPTV-Shell.exe probe`（源码态是 `python tools\探路.py`）—— 本机在跑的服务、磁盘上的 m3u/xmltv、旧 IPTV 项目一次列全（**先自己找，别反问用户要地址**）；
 2. 有清单：`config.json` 填 `provider: "m3u"` + `m3u_path`（直播）+ `vod_m3u`（点播），不写代码；有服务：照 `providers\转发示例.py` 转发；
 3. `IPTV-Shell.exe check`（源码态是 `python tools\模板快检.py --provider <线路>`）必须出「可以交」，把原始输出贴给用户；
-4. 装到桌面：免安装包本身就是绿色的 —— 把 `IPTV-Shell` 文件夹放在桌面，双击里面的 `IPTV-Shell.exe`；源码态才需要 `powershell -File tools\安装.ps1`。装完必须自己点开确认台表能出来、点开能播。
+4. 装到本机：免安装包本身就是绿色的 —— 把 `IPTV-Shell` 文件夹放到**非 C 盘的目录**（如 `D:\软件\IPTV外壳`），**别放桌面**；桌面只要一个图标（第一次双击 exe 时外壳自己会放）。源码态才需要 `powershell -File tools\安装.ps1`。装完必须自己点开确认台表能出来、点开能播。
 
 **播放只交本机播放器**（mpv / VLC / PotPlayer，外壳自己找），不内嵌网页播放器、不自己解码、不做开机自启。真的一份清单都没有，才问盒子型号和是不是运营商 IPTV —— 更细的写法看 `智能体接入指南.md`。
 
@@ -122,8 +122,8 @@
 **路线 A：免安装包（推荐，机器上不用装 Python）**
 
 1. 下载 `iptv-shell-Windows.zip`（上面「先拿东西」里两个地址任选一个）；
-2. 解压到桌面 → 得到一个 `IPTV-Shell` 文件夹；
-3. **双击 `IPTV-Shell.exe`** → 静默起服务，自动打开浏览器，直接就是台表。想常驻就把文件夹留在桌面，不占开机自启。
+2. 解压到 D:\Program Files\IPTV外壳（没有就新建），桌面只留图标 → 得到一个 `IPTV-Shell` 文件夹；
+3. **双击 `IPTV-Shell.exe`** → 静默起服务，自动打开浏览器，直接就是台表；**同时桌面出现「IPTV外壳」图标**，以后点图标就能看。文件夹留在非 C 盘，不占开机自启。
 
 **路线 B：源码（要 Python 3.9+）**
 
@@ -131,7 +131,7 @@
 2. **双击桌面图标** 才开始运行 → 静默起服务，约 3 秒弹出 Edge 应用窗口，直接就是台表。
 
 **不占开机自启**：开机什么都不起，只有你点图标（或双击 exe）才起服务；关掉窗口服务仍在，再点一次立刻回来。
-撤掉：直接删掉桌面的文件夹 / 图标即可（只删程序，不动你的片源和配置）。源码态可用 `powershell -File tools\安装.ps1 -Uninstall`。
+撤掉：删掉桌面图标和那个 `IPTV-Shell` 文件夹即可（只删程序，不动你的片源和配置）。源码态可用 `powershell -File tools\安装.ps1 -Uninstall`。
 
 想手动管服务（不用界面）：`tools\常驻.ps1 start / stop / restart / status`；
 想让它掉了自动拉起：`tools\常驻.ps1 watch`（前台守护，手动开）。

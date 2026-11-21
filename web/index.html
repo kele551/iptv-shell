@@ -121,7 +121,35 @@ input:focus{border-color:#1f6feb}
 .dlg .abox p{margin:0 0 12px;font-size:14px;color:#8b96a4;line-height:1.7}
 .dlg .abox textarea{width:100%;height:220px;background:#0b1017;color:#c9d4de;border:1px solid #24303f;border-radius:8px;padding:12px;font-size:14px;line-height:1.75;font-family:inherit;resize:vertical}
 .dlg .abox .acts{display:flex;gap:12px;margin-top:14px}
-</style></head><body>
+/* 窗口窄了 / 浏览器放大时按比例收：不再出现右边页签被切、卡片大得只看见一列 */
+@media (max-width:1240px){
+  aside{width:172px}
+  .row .nx{width:232px}
+  .epg{width:360px}
+  .list.grid{grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:14px 10px}
+}
+@media (max-width:980px){
+  header{padding:9px 12px;gap:10px;flex-wrap:wrap;align-items:center}
+  h1{font-size:17px}
+  .badge{display:none}
+  .tab{padding:6px 12px;font-size:14px}
+  aside{width:138px}
+  .cat{font-size:14px;padding:7px 8px}
+  .row .nx{display:none}
+  .row .n{font-size:16px}
+  .list.grid{grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:12px 10px;padding:10px 12px 60px}
+  .card .cname{font-size:13.5px}
+  .epg{width:min(300px,52vw)}
+  .dlg{padding:24px 12px}
+}
+@media (max-width:760px){
+  .bar .hint{display:none}
+  .row .side{min-width:56px}
+  .list.grid{grid-template-columns:repeat(auto-fill,minmax(84px,1fr))}
+  .card .star{width:20px;height:20px;line-height:20px;font-size:12px}
+}
+</style>
+</head><body>
 <header>
   <h1>__TITLE__ <i>· __SUB__</i></h1>
   <div class="badge" id="st">连接中…</div>
@@ -149,9 +177,9 @@ input:focus{border-color:#1f6feb}
     <p>整段粘进智能体对话框，它会自己在这台电脑上跑探路、找直播和点播数据流，接进外壳、跑快检、装到桌面。</p>
     <textarea id="aTxt" readonly>请帮我把这个 IPTV 外壳装到你这台电脑上，再接上这台电脑所在的网络。
 
-第 0 步先拿东西：如果这台电脑上已经有 IPTV 外壳的项目目录，就直接用；没有就从 https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip 下载免安装包（这个地址连不上就换 https://github.com/kele551/iptv-shell/releases/download/v1.0/iptv-shell-Windows.zip），解压到桌面，会得到一个 IPTV-Shell 文件夹，里面的 IPTV-Shell.exe 双击就能跑，这台电脑不用装 Python。
+第 0 步先拿东西：如果这台电脑上已经有 IPTV 外壳的项目目录，就直接用；没有就从 https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip 下载免安装包（这个地址连不上就换 https://github.com/kele551/iptv-shell/releases/download/v1.0/iptv-shell-Windows.zip），解压到 D:\Program Files\IPTV外壳（没有就新建这个目录；别解压到桌面，桌面只留图标），会得到一个 IPTV-Shell 文件夹，里面的 IPTV-Shell.exe 双击就能跑，这台电脑不用装 Python。
 
-然后按这个顺序做：跑 IPTV-Shell.exe probe，把本机正在跑的服务、磁盘里的 m3u / m3u8 / xmltv 清单、已有的 IPTV 项目都列出来；选一份能用的接进外壳（改 IPTV-Shell 文件夹里的 config.json，或照 _internal\providers\转发示例.py 写一个适配器）；跑 IPTV-Shell.exe check，出「可以交」才算接好。想放到桌面就保持 IPTV-Shell 文件夹在桌面，以后双击 IPTV-Shell.exe 就能看。
+然后按这个顺序做：跑 IPTV-Shell.exe probe（这个 exe 没有控制台窗口，结果会写到同一个文件夹里的 命令行输出.txt，等它自己跑完再读那个文件），把本机正在跑的服务、磁盘里的 m3u / m3u8 / xmltv 清单、已有的 IPTV 项目都列出来；选一份能用的接进外壳（改 IPTV-Shell 文件夹里的 config.json，或照 _internal\providers\转发示例.py 写一个适配器）；跑 IPTV-Shell.exe check（同样等它跑完、看 命令行输出.txt），出「可以交」才算接好。装好以后桌面会自动出现一个「IPTV外壳」图标，以后双击那个图标就能看（文件夹本身别放桌面）。
 
 播放只用这台电脑上装好的播放器（mpv / VLC / PotPlayer 任一），不要内嵌网页播放器，也不要开机自启。要是这台宽带没开通 IPTV、探路也找不到任何清单，就直接告诉我「这条网络没有可用源」，别编假数据、别拿演示数据糊弄我。
 
