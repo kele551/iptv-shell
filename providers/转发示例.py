@@ -236,6 +236,23 @@ def vod_search(kw, limit=60):
     return f(kw, limit) if callable(f) else []
 
 
+def vod_episodes(pid, cid):
+    """剧集列表：成剧（programSub 多集）整部 id 直接签 = `144020013 media is not exist`，
+    必须拿每集自己的 programId / contentID 逐集签。外部服务一般叫 vod_episodes(pid, cid)。
+    不回这个函数，外壳就把“剧集能力”判成没有，点电视剧一律 404。"""
+    s = _svc()
+    f = getattr(s, 'vod_episodes', None)
+    if not callable(f):
+        return []
+    out = []
+    for e in (f(str(pid), str(cid)) or []):
+        if not (e.get('pid') and e.get('cid')):
+            continue
+        out.append({'pid': str(e['pid']), 'cid': str(e['cid']),
+                    'name': (e.get('name') or '').strip(), 'seq': e.get('seq')})
+    return out
+
+
 def vod_playlist(pid, cid, host):
     s = _svc()
     f = getattr(s, 'build_vod_playlist', None)

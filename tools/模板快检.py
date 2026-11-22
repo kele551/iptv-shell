@@ -253,6 +253,7 @@ def main():
     log = os.path.join(os.environ.get('TEMP') or '/tmp', 'iptv_shell_check.log')
     tag = 'iptv-check-%d' % port      # 本次快检专用标记（管道名 + 进程命令行都带它）
     env = dict(os.environ)
+    env['IPTV_MUTE'] = '1'   # 快检会真起播放器窗口（要证明画面出来），默认静音别吵到人
     if cfg_file:
         # 用临时配置跑：端口、管道都换成本次专用的，绝不去抢用户正在用的那个外壳
         try:
@@ -350,6 +351,42 @@ def main():
                     if st == 200:
                         say(not rewritten, '分片走直连（不绕本机）',
                             '是' if not rewritten else '被改写成转发地址了')
+                # 成剧（多集）单独盯：电影单片一直是绿的，但成剧整部 id 签不出，
+                # 适配器不回 vod_episodes 时外壳会把剧集能力判成没有 → 点电视剧全 404。
+                ep_it = None
+                for c in [k for k in (meta.get('groups') or {}) if '电视剧' in k][:6]:
+                    st, body, _ = get(base + '/api/vod.items.json?cat=%s&limit=200'
+                                      % urllib.parse.quote(c))
+                    for x in (safe_json(body).get('items') or []):
+                        # vol 有的线路给数字（'32'），有的给文案（'全32集'），都得认
+                        d = ''.join(ch for ch in str(x.get('vol') or '') if ch.isdigit())
+                        if d and int(d) > 1:
+                            ep_it = x
+                            break
+                    if ep_it:
+                        break
+                if not ep_it:
+                    print('  [skip] 片库里没找到多集内容，跳过成剧检查')
+                else:
+                    st, body, _ = get(base + '/vod/%s/%s.m3u8' % (ep_it['pid'], ep_it['cid']))
+                    head = body.decode('utf-8', 'ignore')
+                    eps = [ln.strip() for ln in head.splitlines()
+                           if ln.strip().startswith('http') and '/vod/ep/' in ln]
+                    say(st == 200 and len(eps) >= 2, '成剧返回集清单',
+                        '%s（%s 集）→ %d 集' % (ep_it['name'], ep_it.get('vol'), len(eps))
+                        if eps else 'HTTP %d，一条集地址都没有（适配器多半没接 vod_episodes）' % st)
+                    if eps:
+                        st, body, _ = get(eps[0])
+                        ehead = body.decode('utf-8', 'ignore')
+                        segs = [ln.strip() for ln in ehead.splitlines()
+                                if ln.strip() and not ln.startswith('#')]
+                        direct = bool(segs) and all(
+                            not (urllib.parse.urlsplit(s).netloc == hp
+                                 and urllib.parse.urlsplit(s).path.startswith(('/vod', '/seg')))
+                            for s in segs)
+                        say(st == 200 and bool(segs) and direct, '成剧第 1 集能签出分片',
+                            'HTTP %d · %d 个分片 · %s' % (st, len(segs),
+                                                          '直连源站' if direct else '被改写成转发地址'))
             else:
                 print('  [skip] 这条线路没有点播片库（页签仍在，进去显示空态）')
         else:

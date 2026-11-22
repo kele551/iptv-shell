@@ -575,6 +575,9 @@ def mpv_play(url, title=''):
                         '--input-ipc-server=' + CFG['mpv_pipe'], '--no-terminal']
                 if title:
                     args.append('--title=' + title)
+                if os.environ.get('IPTV_MUTE') == '1':
+                    # 快检 / 演练专用：窗口照起（能证明画面出来），但一点声音都不出
+                    args.append('--mute=yes')
                 p = _spawn(exe, [exe] + args)
                 time.sleep(1.3)
                 if p.poll() is not None:
@@ -741,7 +744,8 @@ class Handler(BaseHTTPRequestHandler):
             if m:
                 pid, cid = m.group(1), m.group(2)
                 eps = PROV.vod_episodes(pid, cid) if PROV.caps.get('episodes') else []
-                if len(eps) > 1:
+                if eps:
+                    # 只要这条线路认得出“集”，就给集清单（单集也照给，别再去签整部 id）
                     lines = ['#EXTM3U']
                     for e in eps:
                         lines.append('#EXTINF:-1,' + (e.get('name') or '第%s集' % e.get('seq', '')))

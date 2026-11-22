@@ -68,13 +68,32 @@ def check_start():
 LINE = re.compile(r"^\s*\[(OK|FAIL|skip)\]\s+(.+?)\s{2,}(.*)$")
 
 
+def line_cfg():
+    """优先拿「已装好那份」的线路（用户真正在看的那条），没装才用项目里的示例配置。
+    2026-11-22 教训：以前只跑项目 config 里的 mock，成剧整块 404 也照样全绿。"""
+    for p in (os.path.join(INSTALL, "config.json"), os.path.join(PROJ, "config.json")):
+        try:
+            c = json.loads(open(p, encoding="utf-8-sig").read())
+            if c.get("provider"):
+                return c, p
+        except Exception:
+            continue
+    return {}, ""
+
+
 def check_features():
     port = free_port()
+    lc, lp = line_cfg()
+    env = dict(os.environ)
+    if lc.get("svc_py"):
+        # 转发式线路靠这个变量找到外部服务；不传就会当成空线路，快检白跑
+        env["IPTV_SVC_PY"] = lc["svc_py"]
     p = subprocess.run([PY, os.path.join(PROJ, "tools", "模板快检.py"),
-                        "--port", str(port), "--provider", cfg().get("provider", "mock")],
-                       cwd=PROJ, capture_output=True, text=True, encoding="utf-8",
-                       errors="replace", timeout=600)
+                        "--port", str(port), "--provider", lc.get("provider") or "mock"],
+                       cwd=PROJ, env=env, capture_output=True, text=True, encoding="utf-8",
+                       errors="replace", timeout=900)
     body = (p.stdout or "") + (p.stderr or "")
+    print("  快检线路=%s（%s）" % (lc.get("provider") or "mock", lp or "项目示例配置"))
     seen = 0
     for line in body.splitlines():
         m = LINE.match(line)
