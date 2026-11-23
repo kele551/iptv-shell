@@ -982,13 +982,12 @@ class Handler(BaseHTTPRequestHandler):
                     self._json({'ok': False, 'err': '地址不合法'})
                     return
                 tgt = play_target(u)
+                # 2026-11-23 用户定：不许没验证就给片源下“放不了”的结论。
+                # 只记日志，不拦播放；真放不出来由播放器自己表现，外壳不预判。
                 if tgt:
                     chk = vod_check(*tgt)
                     if not chk.get('ok'):
-                        log('拦下不可播的片源：%s %s' % (t or u, chk.get('msg')))
-                        self._json({'ok': False, 'err': chk.get('msg') or '这片源放不了',
-                                    'code': chk.get('code') or 'bad'})
-                        return
+                        log('播放前检查提示（不拦）：%s %s' % (t or u, chk.get('msg')))
                 ok, err = mpv_play('http://127.0.0.1:%d%s' % (PORT, u), t)
                 if ok:
                     log('交给 MPV：%s %s' % (t or u, u))

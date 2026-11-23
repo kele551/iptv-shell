@@ -712,17 +712,10 @@ function openDetail(v,key){
             :(v.img?'/poster?u='+encodeURIComponent(v.img):'');
   $('dlgPic').style.backgroundImage=pic?('linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.92)),url("'+pic+'")'):'';
   $('dlgFav').textContent=(key&&favVod[key])?'★ 已收藏':'☆ 收藏';
+  $('dlgPlay').textContent='▶ 播放';
   $('dlgPlay').onclick=()=>{d.classList.remove('on');play('/vod/'+v.pid+'/'+v.cid+'.m3u8',v.name,key,'vod');};
-  // 先问一句这片源放不放得了：DRM 加密 / 私有编码的片子提前说明，别让用户等一个黑屏窗口
-  (async()=>{
-    let ck=null;
-    try{ck=await j('/api/vod.check.json?pid='+encodeURIComponent(v.pid)+'&cid='+encodeURIComponent(v.cid));}catch(e){}
-    if(!ck||ck.ok!==false||$('dlgName').textContent!==(v.name||'')) return;
-    $('dlgDesc').innerHTML=esc(v.desc||'（暂无简介）')+'<div class="dlgWarn">⚠ '
-      +esc(ck.msg||'这片源放不了')+'</div>';
-    $('dlgPlay').textContent='✕ 这片源放不了';
-    $('dlgPlay').onclick=()=>toast(ck.msg||'这片源放不了',true);
-  })();
+  // 2026-11-23 用户定：详情卡不给片源贴「不能播」的预标注（实测全是能放的新片，标错了）。
+  // 真放不了由播放器自己报错，外壳不再提前给片子贴标签。
   $('dlgFav').onclick=()=>{
     if(!key) return;
     if(favVod[key]) delete favVod[key]; else favVod[key]=v.name||'';

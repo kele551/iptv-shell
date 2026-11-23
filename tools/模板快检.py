@@ -387,19 +387,7 @@ def main():
                         say(st == 200 and bool(segs) and direct, '成剧第 1 集能签出分片',
                             'HTTP %d · %d 个分片 · %s' % (st, len(segs),
                                                           '直连源站' if direct else '被改写成转发地址'))
-                # 版权保护（DRM）/ 非标编码的片源必须提前拦下：否则播放器黑屏跑到头、
-                # 自动跳下一集、进度条拖不动，用户看到的就是「不显示画面 + 跳集 + 快进不了」
-                if prov == 'mock':
-                    st, body, _ = get(base + '/api/vod.check.json?pid=1&cid=drmdemo')
-                    chk = safe_json(body) or {}
-                    say(st == 200 and chk.get('ok') is False and chk.get('code') == 'drm'
-                        and '秒能放' in (chk.get('msg') or ''),
-                        '版权保护片源拦下', '%s：%s' % (chk.get('code'), (chk.get('msg') or '')[:34]))
-                    st, body, _ = get(base + '/play?u=%s&t=DRM'
-                                      % urllib.parse.quote('/vod/1/drmdemo.m3u8'))
-                    r2 = safe_json(body) or {}
-                    say(r2.get('ok') is False, '版权保护片源不起黑窗',
-                        '拦下并回原因：%s' % ((r2.get('err') or '')[:26]))
+                # 2026-11-23 用户定：不许没验证就给片源贴“放不了”的标签，这里不再做 DRM 预判检查
             else:
                 print('  [skip] 这条线路没有点播片库（页签仍在，进去显示空态）')
         else:

@@ -309,7 +309,6 @@ def main():
     print("=" * 60)
     check_start()
     check_features()
-    check_drm_gate()
     check_token_warn()
     if not a.no_ui:
         check_ui()

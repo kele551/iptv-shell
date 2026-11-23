@@ -38,7 +38,10 @@ $chk = Get-Content "$pkg\_internal\tools\模板快检.py" -Raw -Encoding utf8
 if ($srv -notmatch "n.startswith\('yaoplayer'\)") { throw "包内 server.py 不是新版本" }
 if ($srv -notmatch "def vod_check") { throw "包内 server.py 缺播放前检查（DRM/编码），不是新版本" }
 if ($chk -notmatch "点播放真起播放器") { throw "包内 模板快检.py 不是新版本" }
-if ($chk -notmatch "版权保护片源拦下") { throw "包内 模板快检.py 缺版权保护闸门" }
+# 2026-11-23 用户定：不许没验证就标注“这片源放不了”，包内界面与后段都必须没有拦截
+$webTxt = Get-Content "$pkg\_internal\web\index.html" -Raw -Encoding utf8
+if ($webTxt -match "这片源放不了") { throw "包内界面仍带「这片源放不了」预标注" }
+if ($srv -notmatch "不预判") { throw "包内 server.py 仍在播放前拦截（未按 2026-11-23 口径放开）" }
 $fwd = Get-Content "$pkg\_internal\providers\转发示例.py" -Raw -Encoding utf8
 if ($fwd -notmatch "copyrightDRM" -or $fwd -notmatch "def vod_check") { throw "包内 转发示例.py 缺 DRM/编码识别" }
 # 界面闸门（2026-11-21）：包内 web/index.html 必须与仓库正本逐字节一致，
