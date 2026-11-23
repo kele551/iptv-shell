@@ -144,6 +144,22 @@ TTL_EPG = int(CFG['ttl']['epg'])
 CACHE_DIR = os.path.expandvars(CFG['cache_dir'])
 LOG_PATH = os.path.join(CACHE_DIR, '外壳.log')
 
+# 签址凭证失效时给用户复制给智能体的通用操作稿（线路适配器可用 token_help() 覆盖成自己那套）
+TOKEN_HELP_DEFAULT = """这条线路的签址凭证（token）失效了，接口返回了非 0。请按下面做，把凭证换新：
+
+1) 先确认不是误报：重新触发一次签址（或重启本外壳服务）看是否还是非 0；
+   如果只是公网 IP 变了、或服务没起，先修那两样，不要动机顶盒。
+2) 真失效才动机顶盒：把它断电 30 秒再插回去，等它进到直播画面（约 1~2 分钟）。别用遥控器重启。
+3) 重新抓一次包：电脑要和机顶盒同一网段；装 Npcap（图形安装，勾 winpcap_mode=yes），
+   用 scapy 对机顶盒做“单向 ARP 毒化”（只毒机顶盒→网关这一条），流量走电脑用户态转发，
+   不要改系统路由/注册表，不要两端都毒。抓 150 秒，期间在机顶盒上换一次台、点一次直播。
+4) 从抓到的 getChannelPlayUrl 请求里取凭证字段（stbNo / userToken / userID / encryptedUserToken，
+   以及 areaNode），写进项目自己的凭证文件（不要写进代码，不要贴聊天、日志、git）。
+5) 换完自证：重新签址返回成功、状态接口无报错、抽普通台和 4K 台各拉一次首分片拿到 206。
+
+红线：不用组播那条路；不把服务映射到公网、不异地转发、不共享账号。
+"""
+
 
 def log(msg):
     line = '[%s] %s' % (time.strftime('%Y-%m-%d %H:%M:%S'), msg)
@@ -184,6 +200,8 @@ class Provider(object):
             'variant': hasattr(mod, 'live_variant'),
             'seg': hasattr(mod, 'seg'),
             'episodes': hasattr(mod, 'vod_episodes'),
+            'catchup': hasattr(mod, 'catchup'),
+            'epg_day': hasattr(mod, 'epg_day'),
         }
         self.caps = {k: bool(self.caps.get(k, v)) for k, v in auto.items()}
         self.desc = getattr(mod, 'DESC', '')
@@ -235,9 +253,45 @@ class Provider(object):
             return []
         return fn(pid, cid)
 
+    # --- 签址凭证（token）健康
+    def token_error(self):
+        """线路适配器可选：签址凭证失效时返回一句人话错误，正常返回空串"""
+        fn = getattr(self.mod, 'token_error', None)
+        if not callable(fn):
+            return ''
+        try:
+            return str(fn() or '').strip()
+        except Exception:
+            return ''
+
+    def token_help(self):
+        """线路适配器可选：返回「怎么换 token」的完整操作稿（给用户复制给智能体用）"""
+        fn = getattr(self.mod, 'token_help', None)
+        if callable(fn):
+            try:
+                txt = str(fn() or '').strip()
+                if txt:
+                    return txt
+            except Exception:
+                pass
+        return TOKEN_HELP_DEFAULT
+
     def poster(self, url):
         fn = getattr(self.mod, 'poster', None)
         return fn(url) if fn else None
+
+    # --- 回看 / 时移（可选能力：适配器实现了才有）
+    def epg_day(self, day=1):
+        fn = getattr(self.mod, 'epg_day', None)
+        if fn is None:
+            return {'day': day, 'channels': []}
+        return fn(day)
+
+    def catchup(self, code, start, end):
+        fn = getattr(self.mod, 'catchup', None)
+        if fn is None:
+            raise RuntimeError('这条线路没实现回看')
+        return fn(code, start, end)
 
 
 PROV = Provider(CFG['provider'])
@@ -605,6 +659,30 @@ _bad_lock = threading.Lock()
 BAD_TTL = 900
 
 
+def _plain_seconds(text):
+    """算第一个加密段之前有多少秒明文：DRM 片常常开头几段是明文，
+    播到加密段才黑屏。提示里带这个秒数，才不会把「开头能放」的片子说成「整部放不了」。"""
+    plain, enc, last = 0.0, False, 0.0
+    for line in (text or '').splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        if line.startswith('#EXT-X-KEY'):
+            m = re.search(r'METHOD=([A-Za-z0-9\-]+)', line, re.I)
+            if m and (m.group(1) or '').upper() != 'NONE':
+                enc = True
+            continue
+        if line.startswith('#EXTINF'):
+            m = re.search(r'#EXTINF:([0-9.]+)', line)
+            last = float(m.group(1)) if m else 0.0
+            continue
+        if line.startswith('#'):
+            continue
+        if not enc:
+            plain += last
+    return plain
+
+
 def vod_check(pid, cid):
     key = (str(pid), str(cid))
     with _bad_lock:
@@ -624,9 +702,14 @@ def vod_check(pid, cid):
     if res is None:
         try:
             body, _n = PROV.vod_playlist(str(pid), str(cid), '127.0.0.1')
-            if _DRM_KEY.search(body or ''):
-                res = {'ok': False, 'code': 'drm',
-                       'msg': '这部片的源站带版权加密（DRM），本机播放器解不了，不是外壳的问题。'}
+            if _DRM_KEY.search(body or '') or 'KEYFORMAT="copyrightDRM"' in (body or ''):
+                plain = _plain_seconds(body)
+                if plain >= 5:
+                    msg = ('只有开头约 %d 秒能放，之后是版权方加密（DRM），播放器到那里就会黑屏、跳集；'
+                           '想看全片请到官方 App / 机顶盒。' % int(plain))
+                else:
+                    msg = '这部片的源站带版权加密（DRM），本机播放器解不了，不是外壳的问题。'
+                res = {'ok': False, 'code': 'drm', 'msg': msg}
         except Exception:
             res = None
     if res is None:
@@ -719,6 +802,7 @@ class Handler(BaseHTTPRequestHandler):
                     'epg_age_sec': int(time.time() - _cache['epg_at']) if _cache['epg_at'] else None,
                     'cache_age_sec': int(time.time() - _cache['ch_at']) if _cache['ch_at'] else None,
                     'ttl_sec': TTL_LIVE, 'caps': PROV.caps, 'error': _cache['err'],
+                    'token_error': PROV.token_error(),
                     'boot': int(START_TS),
                     'boot_str': time.strftime('%m-%d %H:%M', time.localtime(START_TS)),
                 }, indent=2)
@@ -728,6 +812,13 @@ class Handler(BaseHTTPRequestHandler):
                 ensure_channels(force=True)
                 ensure_epg(force=True)
                 self._send(200, 'ok, %d channels' % len(_cache['ch']))
+                return
+
+            if path == '/api/token.help.txt':
+                # 页面用它把「怎么换 token」整段给用户复制；带上报错原文，智能体一看就知道是哪条线
+                err = PROV.token_error()
+                head = ('线路：%s\n报错：%s\n\n' % (PROV.name, err)) if err else ('线路：%s\n\n' % PROV.name)
+                self._send(200, head + PROV.token_help())
                 return
 
             if path == '/live.m3u':
@@ -747,6 +838,26 @@ class Handler(BaseHTTPRequestHandler):
                 code = (q.get('code') or [''])[0]
                 info = ensure_epg().get(code) or {}
                 self._json(info, indent=2)
+                return
+
+            if path == '/api/epg.day.json':
+                if not PROV.caps.get('epg_day'):
+                    self._json({'day': 0, 'channels': [], 'caps': PROV.caps})
+                    return
+                day = (q.get('day') or ['1'])[0]
+                self._json(PROV.epg_day(day))
+                return
+
+            m = re.match(r'^/catchup/([A-Za-z0-9_\-]+)\.m3u8$', path)
+            if m:
+                start = (q.get('start') or ['0'])[0]
+                end = (q.get('end') or ['0'])[0]
+                try:
+                    body = PROV.catchup(m.group(1), int(float(start)), int(float(end)))
+                    self._send(200, body, 'application/vnd.apple.mpegurl')
+                except Exception as e:
+                    log('回看失败 %s：%s' % (m.group(1), e))
+                    self._send(404, '#EXTM3U\n# 回看失败：%s\n' % e)
                 return
 
             if path == '/api/live.json':

@@ -132,7 +132,8 @@ def check_drm_gate():
         base = "http://127.0.0.1:%d" % port
         chk = json.loads(urllib.request.urlopen(
             base + "/api/vod.check.json?pid=1&cid=drmdemo", timeout=20).read().decode("utf-8"))
-        add(chk.get("ok") is False and chk.get("code") == "drm", "版权保护片源拦下",
+        add(chk.get("ok") is False and chk.get("code") == "drm"
+            and "秒能放" in (chk.get("msg") or ""), "版权保护片源拦下",
             "%s：%s" % (chk.get("code"), (chk.get("msg") or "")[:34]))
         r2 = json.loads(urllib.request.urlopen(
             base + "/play?u=%2Fvod%2F1%2Fdrmdemo.m3u8&t=DRM", timeout=20).read().decode("utf-8"))
@@ -153,7 +154,63 @@ def check_drm_gate():
             proc.kill()
 
 
-# ---------- ④ 真实界面截图 ----------
+# ---------- ④ 签址凭证失效必须在页面上弹提示、并带可复制的操作稿 ----------
+# 2026-11-23 用户要求：接口返回 retCode 非 0 后，页面要自己跳提示，里面直接给一段
+# 「复制给智能体」的换 token 操作稿，不能让用户自己去猜。
+def check_token_warn():
+    port = free_port()
+    env = dict(os.environ)
+    env["IPTV_TOKEN_DEMO"] = '接口拒绝: {"retCode":"1","retMsg":"用户未登录或会话已失效"}'
+    proc = subprocess.Popen([PY, os.path.join(PROJ, "server.py"), "--port", str(port),
+                             "--provider", "mock"], cwd=PROJ, env=env,
+                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        up = False
+        for _ in range(40):
+            try:
+                urllib.request.urlopen("http://127.0.0.1:%d/status" % port, timeout=2).read()
+                up = True
+                break
+            except Exception:
+                time.sleep(0.3)
+        if not up:
+            add(False, "签址失效弹提示", "mock 服务没起来")
+            return
+        base = "http://127.0.0.1:%d" % port
+        st = json.loads(urllib.request.urlopen(base + "/status", timeout=10).read().decode("utf-8"))
+        add(bool(st.get("token_error")), "状态接口报出签址失效",
+            (st.get("token_error") or "")[:40])
+        txt = urllib.request.urlopen(base + "/api/token.help.txt", timeout=10).read().decode("utf-8")
+        add(len(txt) > 150 and "token" in txt.lower(), "提示里带换token操作稿",
+            "%d 字节 / 首行：%s" % (len(txt), (txt.splitlines() or [""])[0][:30]))
+        code = (
+            "from playwright.sync_api import sync_playwright\n"
+            "with sync_playwright() as p:\n"
+            "    b=p.chromium.launch(channel='msedge')\n"
+            "    pg=b.new_page(viewport={'width':1360,'height':900})\n"
+            "    pg.goto(%r, wait_until='networkidle', timeout=60000)\n"
+            "    pg.wait_for_timeout(2200)\n"
+            "    op=pg.evaluate(\"document.getElementById('tokWarn').open\")\n"
+            "    n=pg.evaluate(\"document.getElementById('tokWarnText').innerText.length\")\n"
+            "    print('TOKOK' if op and n>150 else 'TOKBAD', op, n)\n"
+            "    b.close()\n" % (base + "/",)
+        )
+        r = subprocess.run([PY, "-c", code], capture_output=True, text=True,
+                           encoding="utf-8", errors="replace", timeout=120)
+        out = (r.stdout or "") + (r.stderr or "")
+        add(out.startswith("TOKOK") or "TOKOK" in out, "签址失效弹提示",
+            "弹窗已打开且操作稿已加载" if "TOKOK" in out else out[-120:])
+    except Exception as e:
+        add(False, "签址失效弹提示", repr(e))
+    finally:
+        proc.terminate()
+        try:
+            proc.wait(timeout=8)
+        except Exception:
+            proc.kill()
+
+
+# ---------- ⑤ 真实界面截图 ----------
 def shot(url, path, click_text=None):
     code = (
         "from playwright.sync_api import sync_playwright\n"
@@ -253,6 +310,7 @@ def main():
     check_start()
     check_features()
     check_drm_gate()
+    check_token_warn()
     if not a.no_ui:
         check_ui()
     check_upgrade()

@@ -1,6 +1,7 @@
 ﻿$ErrorActionPreference = "Stop"
 $root = "F:\Harness\projects\IPTV外壳模板"
-$py   = "F:\Harness\toolchain\python\envs\default\Scripts\python.exe"
+# 打包一律用 toolchain\python\versions\3.15.2（只有它装了 PyInstaller，规则 §0 第 33 条）
+$py   = "F:\Harness\toolchain\python\versions\3.15.2\python.exe"
 Set-Location $root
 
 $args = @(

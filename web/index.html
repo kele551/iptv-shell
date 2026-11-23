@@ -172,13 +172,32 @@ input:focus{border-color:var(--blue)}
   *{transition-duration:0ms!important;animation-duration:0ms!important}
   .card:hover .poster,.btn:active,.tab:active,.cat:active,.row:active,.agent:active{transform:none}
 }
+/* 签址凭证失效提示（原生 dialog，不要再叠 role/aria-modal/焦点陷阱） */
+#tokWarn{width:min(760px,94vw);max-height:86vh;margin:auto;padding:0;background:var(--bg-1);color:var(--ink);border:1px solid var(--bg-3);border-radius:var(--r-xl);overflow:auto}
+#tokWarn::backdrop{background:rgba(0,0,0,.72);overflow:hidden;overscroll-behavior:contain}
+#tokWarn:modal{overscroll-behavior:contain}
+#tokWarn[open]{display:flex;flex-direction:column}
+.twHead{display:flex;align-items:center;gap:var(--sp-200);padding:var(--sp-200) var(--sp-300);border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg-1);z-index:1}
+.twHead h2{font-size:var(--fs-lg);line-height:var(--lh-lg);font-weight:600;flex:1}
+.twX{flex:none}
+.twLead{padding:0 var(--sp-300);margin-top:var(--sp-200);color:var(--ink-3);font-size:var(--fs-sm);line-height:var(--lh-sm)}
+.twErr{margin:var(--sp-75) var(--sp-300) 0;padding:var(--sp-100);background:var(--bg-deep);border:1px solid var(--bg-3);border-radius:var(--r-md);color:var(--amber);font-size:var(--fs-sm);line-height:var(--lh-sm);word-break:break-all}
+.twText{margin:var(--sp-75) var(--sp-300) 0;padding:var(--sp-100);max-height:44vh;overflow:auto;background:var(--bg-deep);border:1px solid var(--bg-3);border-radius:var(--r-md);color:var(--ink-2);font:var(--fs-sm)/var(--lh-sm) "Geist Mono","Cascadia Mono",Consolas,"Microsoft YaHei",monospace;white-space:pre-wrap;word-break:break-word;user-select:text}
+.twActs{display:flex;gap:var(--sp-100);align-items:center;padding:var(--sp-200) var(--sp-300) var(--sp-300);position:sticky;bottom:0;background:var(--bg-1)}
+#tokWarn .btn{background:var(--blue);color:#fff;border:0;border-radius:var(--r-md);min-height:24px;padding:var(--sp-100) var(--sp-300);font-size:var(--fs-base);line-height:var(--lh-base);font-weight:600;cursor:pointer;transition:background-color var(--dur) var(--ease),transform var(--dur) var(--ease)}
+#tokWarn .btn:hover{background:#6aabff}
+#tokWarn .btn:active{transform:scale(.98)}
+#tokWarn .btn.ghost{background:var(--bg-2);color:var(--ink-2)}
+#tokWarn .btn.ghost:hover{background:var(--bg-3);color:var(--ink)}
+.tw{position:relative;display:inline-flex}
+.tip{position:absolute;left:0;right:0;top:calc(100% + var(--sp-50));text-align:center;color:var(--green);font-size:var(--fs-xs);line-height:var(--lh-xs);opacity:0;transition:opacity var(--dur) var(--ease);pointer-events:none}
 </style>
 </head><body>
 <header>
   <h1>__TITLE__ <i>· __SUB__</i></h1>
   <div class="badge" id="st">连接中…</div>
   <div class="badge" id="ver" style="color:#4fbd86">界面 --</div>
-  <div class="tabs"><div class="tab on" data-tab="live">直播</div><div class="tab" data-tab="vod">点播</div></div>
+  <div class="tabs"><div class="tab on" data-tab="live">直播</div><div class="tab" data-tab="vod">点播</div><div class="tab" data-tab="replay" id="tabReplay" style="display:none">回看</div></div>
   <div class="agent" id="agentBtn">接线路？复制给智能体的一句话</div>
 </header>
 <main>
@@ -235,9 +254,28 @@ input:focus{border-color:var(--blue)}
     </div>
   </div>
 </div>
+<!-- 签址凭证（token）失效提示：不是普通报错弹窗，里面放的是「复制给智能体」的操作稿 -->
+<dialog id="tokWarn" aria-labelledby="tokWarnTitle" closedby="any">
+  <div class="twHead">
+    <h2 id="tokWarnTitle">这条线路的签址凭证失效了</h2>
+    <button type="button" class="btn ghost twX" id="tokWarnX" aria-label="关闭提示">关闭</button>
+  </div>
+  <p class="twLead">接口返回的原始报错：</p>
+  <p class="twErr" id="tokWarnErr">（没取到报错原文）</p>
+  <p class="twLead">把下面整段复制给智能体，它会按项目规则重新抓包、换新凭证（页面不用关，换完刷新即可）：</p>
+  <pre class="twText" id="tokWarnText" tabindex="0">正在取操作稿…</pre>
+  <div class="twActs">
+    <span class="tw">
+      <button type="button" class="btn" id="tokWarnCopy" command="--copy" commandfor="tokWarnText" aria-label="复制换 token 操作稿">复制给智能体</button>
+      <span class="tip" role="status" id="tokWarnTip"></span>
+    </span>
+    <button type="button" class="btn ghost" id="tokWarnClose">我知道了</button>
+  </div>
+</dialog>
 <script>
 const $=id=>document.getElementById(id);
 let tab='live', cat='', live=null, vod=[], vodCats=[], seen=[], vodType='全部', vodTypes={};
+let rpDay=1, rpData=null, rpWant=null;
 let vodBands={}, vodBand='', vodFk=false, vodTags=[], vodSort='', vodTag='';
 let favLive=JSON.parse(localStorage.getItem('iptv.fav.live')||'[]');
 let favVod=(()=>{try{const v=JSON.parse(localStorage.getItem('iptv.fav.vod')||'{}');
@@ -275,13 +313,177 @@ async function openEpg(code,name){
   }catch(e){$('epgBody').innerHTML='<div class="empty">节目单读取失败。</div>';}
 }
 $('epgX').onclick=()=>$('epg').classList.remove('on');
+// ---------------- 回看 / 时移（线路实现了 catchup 才出现） ----------------
+const DAYS=[[1,'今天'],[2,'昨天'],[3,'前天'],[4,'3 天前'],[5,'4 天前'],[6,'5 天前'],[7,'6 天前']];
+function drawDays(box){
+  const h=document.createElement('div');h.className='sect';h.textContent='回看日期（窗口 6 天）';box.appendChild(h);
+  DAYS.forEach(([d,label])=>{
+    const el=document.createElement('div');
+    el.className='cat'+(rpDay===d?' on':'');
+    const n=(rpData&&rpData.day===d)?(rpData.channels||[]).length:'';
+    el.innerHTML='<em>'+label+'</em><b>'+(n===''?'':n)+'</b>';
+    el.onclick=()=>{if(rpDay===d)return;rpDay=d;rpData=null;drawCats();loadReplay();};
+    box.appendChild(el);
+  });
+  if(rpData&&rpData.filtered){
+    const tip=document.createElement('div');tip.className='sect';
+    tip.style.whiteSpace='normal';tip.style.fontSize='var(--fs-xs)';
+    tip.style.color='var(--ink-4)';tip.textContent='只列实测能回看的台；4K 台和部分频道只能直播，去「直播」看。';
+    box.appendChild(tip);
+  }
+}
+async function loadReplay(){
+  $('st').textContent='回看：正在拉节目单…';
+  $('cnt').textContent='读取中…';
+  const box=$('list');box.classList.remove('grid');
+  box.innerHTML='<div class="empty">正在拉这一天的节目单…</div>';
+  try{rpData=await j('/api/epg.day.json?day='+rpDay);}
+  catch(e){rpData={day:rpDay,channels:[],error:1};}
+  const n=(rpData.channels||[]).length;
+  $('st').textContent='回看 '+(rpData.date||'')+' · '+n+' 台有节目单';
+  drawCats();drawList();
+  if(rpWant){
+    const ch=(rpData.channels||[]).find(x=>x.code===rpWant);rpWant=null;
+    if(ch) openReplay(ch.code,ch.name);
+  }
+}
+function drawReplayList(kw){
+  const box=$('list');box.classList.remove('grid');
+  if(!rpData){box.innerHTML='<div class="empty">正在拉这一天的节目单…</div>';return;}
+  const list=(rpData.channels||[]).filter(c=>!kw||(c.name||'').toLowerCase().includes(kw));
+  $('cnt').textContent='共 '+list.length+' 台 · '+(rpData.total||0)+' 条节目';
+  box.innerHTML=list.length?list.map(c=>{
+    const n=(c.programs||[]).length;
+    return '<div class="row" data-r="'+c.code+'" data-name="'+esc(c.name)+'">'
+      +'<div class="num">'+esc(c.num)+'</div>'
+      +'<div class="main"><div class="n">'+esc(c.name)+'</div>'
+      +'<div class="s">'+esc(c.group||'')+'　共 '+n+' 条节目 · 点开选集</div></div>'
+      +'<div class="side"><div style="color:var(--blue)">回看 ›</div></div></div>';
+  }).join(''):'<div class="empty">这一天没有可用的节目单。</div>';
+  box.querySelectorAll('.row').forEach(r=>r.onclick=()=>openReplay(r.dataset.r,r.dataset.name));
+}
+function openReplay(code,name){
+  const p=$('epg'),ch=(rpData&&(rpData.channels||[]).find(x=>x.code===code))||null;
+  $('epgName').textContent=name+' · '+((rpData&&rpData.date)||'')+' 节目单';
+  p.classList.add('on');
+  if(!ch||!(ch.programs||[]).length){$('epgBody').innerHTML='<div class="empty">这台这一天没有节目单。</div>';return;}
+  const now=Math.floor(Date.now()/1000), win=((rpData&&rpData.window_h)||144)*3600, oldest=now-win;
+  const rows=ch.programs.map(x=>{
+    const st=+x.ts_s, et=+x.ts_e, end=Math.min(et,now);
+    let cls='fut',can=false,note='待播';
+    if(st>now){}
+    else if(et<=now){
+      if(st>=oldest){cls='past';can=true;note='';}
+      else{note='超 6 天';}
+    }else{cls='now';can=true;note='';}
+    return '<div class="p '+cls+'" data-s="'+st+'" data-e="'+end+'" data-can="'+(can?1:0)+'">'
+      +'<div class="t">'+esc(x.s)+'-'+esc(x.e)+'</div>'
+      +'<div class="dot" style="'+(cls==='now'?'':'background:transparent')+'"></div>'
+      +'<div class="m">'+esc(x.title)+(note?' <i style="color:var(--ink-4);font-style:normal">'+note+'</i>':'')+'</div></div>';
+  });
+  $('epgBody').innerHTML=rows.join('');
+  $('epgBody').querySelectorAll('.p').forEach(r=>{
+    if(r.dataset.can!=='1'){r.style.opacity='.55';return;}
+    r.onclick=()=>play('/catchup/'+code+'.m3u8?start='+r.dataset.s+'&end='+r.dataset.e,
+      name+' · '+(rpData&&rpData.date||'')+' 回看');
+  });
+  const btn=document.createElement('div');btn.className='p';
+  btn.innerHTML='<div class="t">▶</div><div class="m" style="color:var(--blue)">看直播</div>';
+  btn.onclick=()=>play('/ch/'+code+'.m3u8',name);
+  $('epgBody').appendChild(btn);
+  const el=$('epgBody').querySelector('.p.now')||$('epgBody').querySelector('.p.past');
+  if(el) $('epgBody').scrollTop=Math.max(0,el.offsetTop-80);
+}
 function play(path,title,key,kind){
   if(key){recent=recent.filter(r=>r.key!==key);recent.unshift({key,kind,title});save();}
   fetch('/play?u='+encodeURIComponent(path)+'&t='+encodeURIComponent(title||''))
-   .then(r=>r.json()).then(d=>toast(d.ok?('正在播：'+title):('打不开：'+(d.err||'')),!d.ok))
+   .then(r=>r.json()).then(d=>{
+     if(d.ok){toast('正在播：'+title);return;}
+     if(TOK_ERR_RE.test(d.err||'')){showTokenWarn(d.err);return;}
+     toast('打不开：'+(d.err||''),true);
+   })
    .catch(()=>toast('请求失败',true));
 }
 async function j(u){const r=await fetch(u);return r.json();}
+
+/* ---------- 签址凭证（token）失效：页面主动弹提示，里面可直接复制给智能体 ---------- */
+const TOK_ERR_RE=/retCode|接口拒绝|签址|没签出地址|token/i;
+const TOK_SEEN='iptvTokWarnSeen';
+function tokenErrOf(st){
+  if(!st) return '';
+  if(st.token_error) return String(st.token_error);
+  if(st.error&&TOK_ERR_RE.test(String(st.error))) return String(st.error);
+  return '';
+}
+async function showTokenWarn(err){
+  const dlg=$('tokWarn');
+  if(!dlg||dlg.open) return;
+  $('tokWarnErr').textContent=err||'（没取到报错原文）';
+  dlg.dataset.err=err||'';
+  $('tokWarnText').textContent='正在取操作稿…';
+  try{
+    const r=await fetch('/api/token.help.txt');
+    $('tokWarnText').textContent=(await r.text()).trim()||'（操作稿没取到，请直接找智能体要换 token 的操作稿）';
+  }catch(e){
+    $('tokWarnText').textContent='（操作稿没取到，请直接找智能体要换 token 的操作稿）';
+  }
+  dlg.showModal();
+  $('tokWarnCopy').focus();
+}
+async function checkToken(){
+  try{
+    const st=await j('/status');
+    const err=tokenErrOf(st);
+    if(!err) return;
+    if(localStorage.getItem(TOK_SEEN)===err) return;   // 同一条报错只烦用户一次
+    showTokenWarn(err);
+  }catch(e){}
+}
+function copyWarnText(){
+  const target=$('tokWarnText');
+  const text=(target.innerText||target.textContent||'').trim();
+  if(!text) return Promise.resolve(false);
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    return navigator.clipboard.writeText(text).then(()=>true).catch(()=>legacyCopy(text));
+  }
+  return Promise.resolve(legacyCopy(text));
+}
+function legacyCopy(text){
+  try{
+    const ta=document.createElement('textarea');
+    ta.value=text;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.top='-1000px';
+    document.body.appendChild(ta);ta.select();
+    const ok=document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  }catch(e){return false;}
+}
+let _tokTimer=0;
+function tokReport(ok){
+  const tip=$('tokWarnTip'),btn=$('tokWarnCopy');
+  clearTimeout(_tokTimer);
+  tip.textContent='';btn.removeAttribute('data-copied');btn.removeAttribute('data-failed');
+  tip.style.opacity='0';
+  void btn.offsetWidth;
+  btn.setAttribute(ok?'data-copied':'data-failed','');
+  requestAnimationFrame(()=>{tip.textContent=ok?'已复制':'复制失败，请手动全选';tip.style.opacity='1';});
+  _tokTimer=setTimeout(()=>{tip.textContent='';tip.style.opacity='0';btn.removeAttribute('data-copied');btn.removeAttribute('data-failed');},2000);
+}
+if('CommandEvent' in window){
+  document.addEventListener('command',e=>{
+    if(e.command!=='--copy'||e.target!==$('tokWarnText')) return;
+    copyWarnText().then(tokReport);
+  },true);
+}else{
+  $('tokWarnCopy').addEventListener('click',()=>copyWarnText().then(tokReport));
+}
+$('tokWarnX').addEventListener('click',()=>$('tokWarn').close());
+$('tokWarnClose').addEventListener('click',()=>$('tokWarn').close());
+$('tokWarn').addEventListener('close',()=>{
+  localStorage.setItem(TOK_SEEN,$('tokWarn').dataset.err||'');
+});
+setTimeout(checkToken,800);
+setInterval(()=>{if(document.visibilityState==='visible') checkToken();},60000);
 
 function pseudo(){
   const allVod=Object.values(vodTypes).reduce((a,b)=>a+b,0)||((vodPage&&vodPage.total)||0);
@@ -300,6 +502,7 @@ const BANDS=[['2026','2026 年'],['2025','2025 年'],['2024','2024 年'],['old',
 let openTypes={'电影':1,'电视剧':1};
 function drawCats(){
   const box=$('cats');box.innerHTML='';
+  if(tab==='replay'){ drawDays(box); return; }
   const ps=pseudo();
   ps.forEach(p=>{
     const d=document.createElement('div');
@@ -390,6 +593,7 @@ function progress(c){
 function drawList(){
   const kw=($('kw').value||'').trim().toLowerCase(), box=$('list');
   const rows=[];let n=0;
+  if(tab==='replay'){ drawReplayList(kw); return; }
   if(tab==='live'){
     let items=[];
     (live?live.groups:[]).forEach(g=>{ if(cat!=='@全部'&&cat!=='@收藏'&&cat!=='@最近播放'&&g.name!==cat) return;
@@ -576,6 +780,10 @@ async function loadTab(){
   if(tab==='live'){
     if(!live){live=await j('/api/live.json');}
     $('st').textContent='直播 '+live.total+' 台 · 节目单更新 '+live.updated;
+  }else if(tab==='replay'){
+    if(!rpData||rpData.day!==rpDay||rpData.error){await loadReplay();}
+    else{drawCats();drawList();}
+    return;
   }else{
     const caps=(window.TPL&&window.TPL.caps)||{};
     if(!caps.vod){
@@ -626,6 +834,20 @@ $('kw').oninput=()=>{
   }else drawList();
 };
 if(location.hash==='#vod'){document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.tab==='vod'));tab='vod';}
+// 回看页签：线路没实现 catchup 就整个不出现（实现了才给，别让人点了报错）
+(function(){
+  const caps=(window.TPL&&window.TPL.caps)||{},t=$('tabReplay');
+  if(!t) return;
+  if(!caps.catchup){t.remove();return;}
+  t.style.display='';
+  if(location.hash==='#replay'){
+    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.tab==='replay'));
+    tab='replay';
+  }else if(location.hash.indexOf('#replay/')===0){
+    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.tab==='replay'));
+    tab='replay';rpWant=decodeURIComponent(location.hash.slice(8));
+  }
+})();
 // 复制给智能体的一句话
 $('agentBtn').onclick=()=>$('adlg').classList.add('on');
 $('adlgX').onclick=()=>$('adlg').classList.remove('on');

@@ -4,12 +4,26 @@
 真接线路时不用改它，照这个文件的函数名写自己的适配器即可。
 """
 import hashlib
+import os
 import time
 
 NAME = '演示线路'
 DESC = '内置假数据，不连外网，用来看界面'
 TITLE = '我的IPTV'
 SUB = '演示外壳'
+
+
+def token_error():
+    """只在自检时用：设了 IPTV_TOKEN_DEMO 就当签址失效，让界面弹出提示；正常返回空串"""
+    return os.environ.get('IPTV_TOKEN_DEMO', '')
+
+
+def token_help():
+    return ('这条线路的签址 token 失效了（自检用假报错）。\n'
+            '1) 先重新触发一次签址，确认不是公网 IP 变了或服务没起。\n'
+            '2) 真失效才断电重启机顶盒 30 秒。\n'
+            '3) 重新抓包取新 token，写进本项目的凭证文件。\n'
+            '4) 换完复验：签址成功、状态无报错、抽台拉到首分片 206。\n')
 CAPS = {'live': True, 'epg': True, 'vod': True, 'search': True, 'poster': True,
         'episodes': True, 'variant': False, 'seg': False}
 
@@ -190,7 +204,11 @@ def vod_episodes(pid, cid):
 def vod_playlist(pid, cid, host):
     # 专门给快检验「版权保护片源要被拦下」用的假条目（不在片库里，正常用户碰不到）
     if str(cid) == 'drmdemo':
+        # 前两段明文（各 8 秒），第三段起才加密 —— 真片就是这个形态，提示要能报出明文秒数
         return ('#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:10\n'
+                '#EXT-X-KEY:METHOD=NONE\n'
+                '#EXTINF:8,\nhttp://127.0.0.1:9/drm-a.ts\n'
+                '#EXTINF:8,\nhttp://127.0.0.1:9/drm-b.ts\n'
                 '#EXT-X-KEY:METHOD=AES-128,URI="https://example.invalid/drm.key",'
                 'KEYFORMAT="copyrightDRM",KEYFORMATVERSIONS="1"\n'
                 '#EXTINF:10,\nhttp://127.0.0.1:9/drm-0.ts\n#EXT-X-ENDLIST\n'), 1

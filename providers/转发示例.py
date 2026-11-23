@@ -144,6 +144,24 @@ def live_playlist(code, host):
     return r[0] if isinstance(r, tuple) else r
 
 
+def epg_day(day=1):
+    """某一天整台节目单（回看时间轴用）。外部服务没有就不给，界面自动藏回看页签。"""
+    s = _svc()
+    f = getattr(s, 'epg_day', None)
+    if not callable(f):
+        return {'day': day, 'channels': []}
+    return f(day)
+
+
+def catchup(code, start, end):
+    """回看清单：外部服务按 servicetype=3 + Playseek 拼出历史清单"""
+    s = _svc()
+    f = getattr(s, 'build_catchup_playlist', None)
+    if not callable(f):
+        raise RuntimeError('外部服务没有 build_catchup_playlist，播不了回看')
+    return f(code, int(start), int(end))
+
+
 def live_variant(code, idx, host):
     s = _svc()
     f = getattr(s, 'build_variant', None)
@@ -277,6 +295,59 @@ def status_extra():
     return {'svc': _svc_path()}
 
 
+TOKEN_HELP = """这条线路的签址 token 过期了（签址接口返回 retCode 非 0），请重新抓包换新 token，按下面做：
+
+1) 先确认不是误报：在本机跑 重抓并测速.py --no-speed（脚本在该项目的 tools 目录）。
+   出 retCode=0、台数 140 上下 = token 没坏（多半是公网出口 IP 变了或本地数据服务没起），不要动机顶盒；
+   只有 retCode 非 0 才继续。
+
+2) 把机顶盒拔电源 30 秒再插回去，等它进到直播画面（约 1～2 分钟）。别用遥控器重启，要真断电。
+
+3) 抓包：电脑要和机顶盒同网段。
+   装 Npcap（图形安装，勾 winpcap_mode=yes）；用 scapy 对机顶盒做“单向 ARP 毒化”（只毒机顶盒→网关这一条），
+   流量走电脑用户态转发，不要改系统路由/注册表，也不要两端都毒。
+   抓 150 秒，期间在机顶盒上换一次台、点一次直播，让它发频道列表和取播放地址两个请求，
+   pcap 存到该项目的抓源目录（按当天日期建文件夹）。
+
+4) 从抓包里取 5 个值：stbNo、userToken、userID、encryptedUserToken、areaNode，
+   写进本机的凭证文件 secrets\\iptv-账号.json（字段名照旧）。只改这个文件，程序是现读的，不用改代码；
+   不许打印 token 明文，不许进 git、不许贴聊天。
+   另外把频道列表的 body 存成 req_channels_body.txt，取播放地址的 body 存成 req_playurl_body.txt
+   （body 必须带 "contentType":"Channel" 和 "urlFormat":"1"）。
+
+5) 换完自证三步：① 重抓并测速.py --no-speed 出 retCode=0、台数 140 上下；
+   ② 本地数据服务的 /status 里 error 为空；
+   ③ 抽 CCTV-1 高清、湖南卫视、CCTV-4K 三台各拉一次：主清单 200、首分片 206（4K 只取 1KB 验证，别整段下）。
+
+红线：不走组播 igmp 那条路；不把播放服务映射公网、不异地转发、不共享账号；
+抓不到包先查 Npcap 是否装好、毒化是否只做单向、转发是否真在走，实在抓不到再问用户。
+"""
+
+
+def token_error():
+    """签址凭证失效时把外部服务记下的报错回给外壳；正常返回空串"""
+    try:
+        s = _svc()
+    except Exception:
+        return ''
+    errs = []
+    for name in ('_cache', '_epg_cache'):
+        d = getattr(s, name, None) or {}
+        e = str(d.get('err') or '').strip()
+        if e:
+            errs.append(e)
+    err = '；'.join(errs)
+    # 只认「签址被拒」这一类，网络抖动/别的接口报错不要误导用户去换 token
+    low = err.lower()
+    if err and ('retcode' in low or '接口拒绝' in err or 'token' in low):
+        return err[:300]
+    return ''
+
+
+def token_help():
+    return TOKEN_HELP
+
+
 # ------------------------------------------------ 播放可用性检查（可选函数）
 # 2026-11-23 实测：2026 年上新的部分片子走「版权保护 / 私有编码」通道，
 #   · 有的清单里直接带 #EXT-X-KEY:METHOD=AES-128,KEYFORMAT="copyrightDRM"（优酷 DRM）
@@ -359,6 +430,32 @@ def _ts_probe(ts):
     return stype, sps
 
 
+def _plain_seconds(text):
+    """算"第一个加密段之前有多少秒明文"。DRM 片通常前面一小段是明文，
+    播到加密段才黑屏；提示里把这个秒数报出来，用户才不会觉得"明明能放你说放不了"。"""
+    import re
+    plain, enc, last_dur = 0.0, False, 0.0
+    for line in (text or '').splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        if line.startswith('#EXT-X-KEY'):
+            m = re.search(r'METHOD=([A-Za-z0-9\-]+)', line, re.I)
+            meth = (m.group(1) or '').upper() if m else ''
+            if meth and meth != 'NONE':
+                enc = True
+            continue
+        if line.startswith('#EXTINF'):
+            m = re.search(r'#EXTINF:([0-9.]+)', line)
+            last_dur = float(m.group(1)) if m else 0.0
+            continue
+        if line.startswith('#'):
+            continue
+        if not enc:
+            plain += last_dur
+    return plain
+
+
 def vod_check(pid, cid):
     """返回 {'ok':bool,'code':'drm'|'codec','msg':...}；判不出来一律当能放，不误杀正常片子"""
     import re
@@ -386,9 +483,16 @@ def vod_check(pid, cid):
     text = ent.get('text') or ''
     if re.search(r'#EXT-X-KEY[^\r\n]*METHOD=(?!NONE)', text, re.I) \
             or 'KEYFORMAT="copyrightDRM"' in text:
-        return {'ok': False, 'code': 'drm',
-                'msg': '这部片是版权方加密的（DRM 保护），本机播放器解不了；'
-                       '不是外壳坏了，官方机顶盒里才放得出来。'}
+        # 很多版权加密片不是一上来就加密：前面几段是明文，播到加密段才黑屏。
+        # 所以提示要给"能放多久"，不许笼统说"整部放不了"（用户实测开头明明能放）。
+        plain = _plain_seconds(text)
+        if plain >= 5:
+            msg = ('只有开头约 %d 秒能放，之后是版权方加密（DRM），播放器到那里就会黑屏、跳集；'
+                   '想看全片请到官方 App / 机顶盒。' % int(plain))
+        else:
+            msg = ('这部片是版权方加密的（DRM 保护），本机播放器解不了；'
+                   '不是外壳坏了，官方机顶盒里才放得出来。')
+        return {'ok': False, 'code': 'drm', 'msg': msg}
     segs = ent.get('segs') or []
     if not segs:
         return None
@@ -405,7 +509,7 @@ def vod_check(pid, cid):
                 'msg': '这集的视频用的是 AVS 编码（国产标准），本机 mpv / VLC 解不了。'}
     if stype == 0x1b and prof is not None and prof not in _SPS_OK:
         return {'ok': False, 'code': 'codec',
-                'msg': '这集的视频码流不是标准 H.264（源站私有编码 / 加密），'
-                       '本机播放器解不了，不是外壳的问题。'}
+                'msg': '该片源是运营商私有编码（清单写 H.264，实际码流不是标准格式），'
+                       '本机播放器解不出画面，不是外壳的问题；请到官方机顶盒 / App 看。'}
     return {'ok': True, 'code': '', 'msg': ''}
 

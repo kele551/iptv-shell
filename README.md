@@ -5,7 +5,7 @@
 
 <p><a href="https://kele551.github.io/iptv-shell/"><img alt="打开官网 · 图文安装说明" src="https://img.shields.io/badge/%F0%9F%91%89_%E6%89%93%E5%BC%80%E5%AE%98%E7%BD%91-%E5%9B%BE%E6%96%87%E5%AE%89%E8%A3%85%E8%AF%B4%E6%98%8E-1f5fd0?style=for-the-badge"></a></p>
 
-<p><b>先拿东西</b>：<a href="https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip"><b>⬇ 免安装包 · Windows（8.3 MB，这台电脑不用装 Python）</b></a><br>
+<p><b>先拿东西</b>：<a href="https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip"><b>⬇ 免安装包 · Windows（9.8 MB，这台电脑不用装 Python）</b></a><br>
 备用下载：<a href="https://github.com/kele551/iptv-shell/releases/latest/download/iptv-shell-Windows.zip">GitHub Release 同一份文件</a>　|　<a href="https://github.com/kele551/iptv-shell/archive/refs/heads/main.zip">源码 zip（这条路要 Python 3.9+）</a></p>
 
 <p><b>第一次来，先打开官网</b>：<a href="https://kele551.github.io/iptv-shell/">https://kele551.github.io/iptv-shell/</a><br>

@@ -392,8 +392,9 @@ def main():
                 if prov == 'mock':
                     st, body, _ = get(base + '/api/vod.check.json?pid=1&cid=drmdemo')
                     chk = safe_json(body) or {}
-                    say(st == 200 and chk.get('ok') is False and chk.get('code') == 'drm',
-                        '版权保护片源拦下', '%s：%s' % (chk.get('code'), (chk.get('msg') or '')[:30]))
+                    say(st == 200 and chk.get('ok') is False and chk.get('code') == 'drm'
+                        and '秒能放' in (chk.get('msg') or ''),
+                        '版权保护片源拦下', '%s：%s' % (chk.get('code'), (chk.get('msg') or '')[:34]))
                     st, body, _ = get(base + '/play?u=%s&t=DRM'
                                       % urllib.parse.quote('/vod/1/drmdemo.m3u8'))
                     r2 = safe_json(body) or {}
