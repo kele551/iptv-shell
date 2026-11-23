@@ -188,6 +188,12 @@ def vod_episodes(pid, cid):
 
 
 def vod_playlist(pid, cid, host):
+    # 专门给快检验「版权保护片源要被拦下」用的假条目（不在片库里，正常用户碰不到）
+    if str(cid) == 'drmdemo':
+        return ('#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:10\n'
+                '#EXT-X-KEY:METHOD=AES-128,URI="https://example.invalid/drm.key",'
+                'KEYFORMAT="copyrightDRM",KEYFORMATVERSIONS="1"\n'
+                '#EXTINF:10,\nhttp://127.0.0.1:9/drm-0.ts\n#EXT-X-ENDLIST\n'), 1
     return ('#EXTM3U\n#EXT-X-VERSION:3\n#EXTINF:6,演示线路（无真实源）\n'
             'http://127.0.0.1:9/demo-%s-%s.ts\n' % (pid, cid)), 1
 

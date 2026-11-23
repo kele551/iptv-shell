@@ -594,6 +594,69 @@ def mpv_play(url, title=''):
             return False, str(e)
 
 
+# --------------------------------------------------------- 播放可用性检查（DRM / 非标编码）
+# 2026-11-23 用户报「这两部电视剧不显示画面、会跳集、快进不了」：实测是片源带版权加密
+# （#EXT-X-KEY:METHOD=AES-128 / KEYFORMAT="copyrightDRM"）或源站用了非标准 H.264（SPS 非法）。
+# 播放器拿到放不了，会黑屏跑到头再自动跳下一集，看着就像「跳集 + 快进不了」。
+# 这里在交给播放器之前先判一次：放不了就直接回原因，绝不起黑屏窗口。
+_DRM_KEY = re.compile(r'#EXT-X-KEY[^\r\n]*METHOD=(?!NONE)', re.I)
+_bad_cache = {}
+_bad_lock = threading.Lock()
+BAD_TTL = 900
+
+
+def vod_check(pid, cid):
+    key = (str(pid), str(cid))
+    with _bad_lock:
+        ent = _bad_cache.get(key)
+        if ent and time.time() - ent['at'] < BAD_TTL:
+            return ent['res']
+    res = None
+    # 注意：要问线路适配器模块本身（PROV.mod），外壳的 Provider 包装类只转发固定几个函数
+    f = getattr(getattr(PROV, 'mod', None), 'vod_check', None)
+    if callable(f):
+        try:
+            got = f(str(pid), str(cid))
+            if isinstance(got, dict):
+                res = got
+        except Exception as e:
+            log('播放检查失败 %s/%s: %s' % (pid, cid, e))
+    if res is None:
+        try:
+            body, _n = PROV.vod_playlist(str(pid), str(cid), '127.0.0.1')
+            if _DRM_KEY.search(body or ''):
+                res = {'ok': False, 'code': 'drm',
+                       'msg': '这部片的源站带版权加密（DRM），本机播放器解不了，不是外壳的问题。'}
+        except Exception:
+            res = None
+    if res is None:
+        res = {'ok': True, 'code': '', 'msg': ''}
+    with _bad_lock:
+        _bad_cache[key] = {'at': time.time(), 'res': res}
+        while len(_bad_cache) > 300:
+            _bad_cache.pop(next(iter(_bad_cache)))
+    return res
+
+
+def play_target(u):
+    """/play 的地址如果是点播，算出要检查的那一集（成剧先看第 1 集）"""
+    m = re.match(r'^/vod/ep/([A-Za-z0-9_\-]+)/([A-Za-z0-9_\-]+)\.m3u8$', u)
+    if m:
+        return m.group(1), m.group(2)
+    m = re.match(r'^/vod/([A-Za-z0-9_\-]+)/([A-Za-z0-9_\-]+)\.m3u8$', u)
+    if not m:
+        return None
+    pid, cid = m.group(1), m.group(2)
+    if PROV.caps.get('episodes'):
+        try:
+            eps = PROV.vod_episodes(pid, cid) or []
+        except Exception:
+            eps = []
+        if eps:
+            return str(eps[0]['pid']), str(eps[0]['cid'])
+    return pid, cid
+
+
 # ---------------------------------------------------------------- HTTP
 
 
@@ -792,12 +855,29 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(st, data, (hd or {}).get('Content-Type', 'video/mp2t'))
                 return
 
+            if path == '/api/vod.check.json':
+                pid = (q.get('pid') or [''])[0]
+                cid = (q.get('cid') or [''])[0]
+                if not pid or not cid:
+                    self._json({'ok': False, 'err': '缺 pid / cid'})
+                    return
+                self._json(vod_check(pid, cid))
+                return
+
             if path == '/play':
                 u = (q.get('u') or [''])[0]
                 t = (q.get('t') or [''])[0]
                 if not u.startswith('/') or u.startswith('//'):
                     self._json({'ok': False, 'err': '地址不合法'})
                     return
+                tgt = play_target(u)
+                if tgt:
+                    chk = vod_check(*tgt)
+                    if not chk.get('ok'):
+                        log('拦下不可播的片源：%s %s' % (t or u, chk.get('msg')))
+                        self._json({'ok': False, 'err': chk.get('msg') or '这片源放不了',
+                                    'code': chk.get('code') or 'bad'})
+                        return
                 ok, err = mpv_play('http://127.0.0.1:%d%s' % (PORT, u), t)
                 if ok:
                     log('交给 MPV：%s %s' % (t or u, u))

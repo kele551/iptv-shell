@@ -125,6 +125,7 @@ input:focus{border-color:var(--blue)}
 .dlg .line{font-size:var(--fs-base);line-height:var(--lh-base);color:var(--ink-2);margin:var(--sp-75) 0}
 .dlg .line b{color:var(--ink-3);font-weight:400}
 .dlg .desc{font-size:var(--fs-base);line-height:var(--lh-base);color:var(--ink-2);margin-top:var(--sp-200)}
+.dlg .desc .dlgWarn{margin-top:var(--sp-100);padding:var(--sp-75) var(--sp-100);border-radius:var(--r-md);border:1px solid var(--line);color:var(--ink);background:var(--bg-2)}
 .dlg .acts{display:flex;gap:var(--sp-200);margin-top:var(--sp-300);padding-top:var(--sp-200);border-top:1px solid var(--line)}
 .dlg .btn{background:var(--blue);color:#fff;border:0;border-radius:var(--r-md);padding:var(--sp-100) var(--sp-300);font-size:var(--fs-base);line-height:var(--lh-base);font-weight:600;cursor:pointer;transition:transform var(--dur) var(--ease),background-color var(--dur) var(--ease)}
 .dlg .btn:hover{background:#6aabff}
@@ -508,6 +509,16 @@ function openDetail(v,key){
   $('dlgPic').style.backgroundImage=pic?('linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.92)),url("'+pic+'")'):'';
   $('dlgFav').textContent=(key&&favVod[key])?'★ 已收藏':'☆ 收藏';
   $('dlgPlay').onclick=()=>{d.classList.remove('on');play('/vod/'+v.pid+'/'+v.cid+'.m3u8',v.name,key,'vod');};
+  // 先问一句这片源放不放得了：DRM 加密 / 私有编码的片子提前说明，别让用户等一个黑屏窗口
+  (async()=>{
+    let ck=null;
+    try{ck=await j('/api/vod.check.json?pid='+encodeURIComponent(v.pid)+'&cid='+encodeURIComponent(v.cid));}catch(e){}
+    if(!ck||ck.ok!==false||$('dlgName').textContent!==(v.name||'')) return;
+    $('dlgDesc').innerHTML=esc(v.desc||'（暂无简介）')+'<div class="dlgWarn">⚠ '
+      +esc(ck.msg||'这片源放不了')+'</div>';
+    $('dlgPlay').textContent='✕ 这片源放不了';
+    $('dlgPlay').onclick=()=>toast(ck.msg||'这片源放不了',true);
+  })();
   $('dlgFav').onclick=()=>{
     if(!key) return;
     if(favVod[key]) delete favVod[key]; else favVod[key]=v.name||'';

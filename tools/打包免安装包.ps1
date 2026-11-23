@@ -35,7 +35,11 @@ if (-not (Test-Path "$pkg\IPTV外壳.ico")) { throw "打包失败：图标 ico �
 $srv = Get-Content "$pkg\_internal\server.py" -Raw -Encoding utf8
 $chk = Get-Content "$pkg\_internal\tools\模板快检.py" -Raw -Encoding utf8
 if ($srv -notmatch "n.startswith\('yaoplayer'\)") { throw "包内 server.py 不是新版本" }
+if ($srv -notmatch "def vod_check") { throw "包内 server.py 缺播放前检查（DRM/编码），不是新版本" }
 if ($chk -notmatch "点播放真起播放器") { throw "包内 模板快检.py 不是新版本" }
+if ($chk -notmatch "版权保护片源拦下") { throw "包内 模板快检.py 缺版权保护闸门" }
+$fwd = Get-Content "$pkg\_internal\providers\转发示例.py" -Raw -Encoding utf8
+if ($fwd -notmatch "copyrightDRM" -or $fwd -notmatch "def vod_check") { throw "包内 转发示例.py 缺 DRM/编码识别" }
 # 界面闸门（2026-11-21）：包内 web/index.html 必须与仓库正本逐字节一致，
 # 防止「代码改了、包里还是旧样式」——界面改动曾因部署副本不同步而看不出效果。
 $webSrc = (Get-FileHash "$root\web\index.html" -Algorithm SHA256).Hash
@@ -69,4 +73,5 @@ Copy-Item $zip "$root\docs\download\iptv-shell-Windows.zip" -Force
 "包内 _meta.py: " + (Test-Path "$pkg\_internal\providers\_meta.py")
 "包内 server.py 含修复: True"
 "包内 快检含新项: True"
+"包内 播放前检查（DRM/编码）: True"
 "包内 界面与正本一致: True (SHA256 $webSrc)"

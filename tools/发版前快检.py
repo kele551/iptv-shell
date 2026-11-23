@@ -108,7 +108,52 @@ def check_features():
         add(False, "模板快检跑完", "没有解析到任何检查项：%s" % body[-200:])
 
 
-# ---------- ③ 真实界面截图 ----------
+# ---------- ③ 版权保护 / 非标编码片源必须被拦下 ----------
+# 2026-11-23 用户报「电视剧不显示画面、会跳集、快进不了」：源站有的是 DRM 加密，
+# 有的是私有编码，播放器解不了 → 黑屏跑到头自动跳集。这条闸门用 mock 里固定的
+# drmdemo 假清单做确定性验证（不看上游脸色的那种）。
+def check_drm_gate():
+    port = free_port()
+    proc = subprocess.Popen([PY, os.path.join(PROJ, "server.py"), "--port", str(port),
+                             "--provider", "mock"], cwd=PROJ,
+                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        up = False
+        for _ in range(40):
+            try:
+                urllib.request.urlopen("http://127.0.0.1:%d/status" % port, timeout=2).read()
+                up = True
+                break
+            except Exception:
+                time.sleep(0.3)
+        if not up:
+            add(False, "版权保护片源拦下", "mock 服务没起来")
+            return
+        base = "http://127.0.0.1:%d" % port
+        chk = json.loads(urllib.request.urlopen(
+            base + "/api/vod.check.json?pid=1&cid=drmdemo", timeout=20).read().decode("utf-8"))
+        add(chk.get("ok") is False and chk.get("code") == "drm", "版权保护片源拦下",
+            "%s：%s" % (chk.get("code"), (chk.get("msg") or "")[:34]))
+        r2 = json.loads(urllib.request.urlopen(
+            base + "/play?u=%2Fvod%2F1%2Fdrmdemo.m3u8&t=DRM", timeout=20).read().decode("utf-8"))
+        add(r2.get("ok") is False, "版权保护片源不起黑窗",
+            "拦下并回原因：%s" % ((r2.get("err") or "")[:30]))
+        # 正常片子不能被误杀：普通假清单必须判成可播
+        chk2 = json.loads(urllib.request.urlopen(
+            base + "/api/vod.check.json?pid=1&cid=okdemo", timeout=20).read().decode("utf-8"))
+        add(chk2.get("ok") is True, "正常片源不被误拦",
+            "okdemo 判为可播")
+    except Exception as e:
+        add(False, "版权保护片源拦下", repr(e))
+    finally:
+        proc.terminate()
+        try:
+            proc.wait(timeout=8)
+        except Exception:
+            proc.kill()
+
+
+# ---------- ④ 真实界面截图 ----------
 def shot(url, path, click_text=None):
     code = (
         "from playwright.sync_api import sync_playwright\n"
@@ -207,6 +252,7 @@ def main():
     print("=" * 60)
     check_start()
     check_features()
+    check_drm_gate()
     if not a.no_ui:
         check_ui()
     check_upgrade()

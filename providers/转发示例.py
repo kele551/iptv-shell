@@ -275,3 +275,137 @@ def poster(rel):
 
 def status_extra():
     return {'svc': _svc_path()}
+
+
+# ------------------------------------------------ 播放可用性检查（可选函数）
+# 2026-11-23 实测：2026 年上新的部分片子走「版权保护 / 私有编码」通道，
+#   · 有的清单里直接带 #EXT-X-KEY:METHOD=AES-128,KEYFORMAT="copyrightDRM"（优酷 DRM）
+#   · 有的没有任何 KEY 标记，但视频 SPS 不是标准 H.264（profile_idc 非法），播放器全解不了
+# 共同表现：黑屏 → 跑到头自动跳下一集 → 进度条拖不动。外壳必须提前判出来并如实提示，不许起黑屏。
+_DRM = None
+_SPS_OK = {66, 77, 88, 100, 110, 122, 244, 44, 83, 86, 118, 128, 138, 139}
+_AVS_TYPES = (0x42, 0x43)
+
+
+def _head(url, n=96 * 1024):
+    """只取前 96 KB（想看的 SPS/PPS/PMT 都在开头），别把一整集拉下来"""
+    import urllib.request
+    req = urllib.request.Request(url, headers={'Range': 'bytes=0-%d' % (n - 1),
+                                               'User-Agent': 'IPTVShell/check'})
+    with urllib.request.urlopen(req, timeout=20) as r:
+        return r.read(n)
+
+
+def _ts_probe(ts):
+    """从 TS 头里读视频 stream_type 和 SPS 的 profile_idc：(type, profile)
+
+    只看开头几十个包就够了：PAT → PMT → 视频 PES 里的 SPS。解不出来就回 (None, None)，
+    调用方按「判不出来就算能播」处理，不能因为解析失败误杀正常片子。
+    """
+    pkt = 188
+    pmt_pid, stype, vid_pid, sps = None, None, None, None
+    payload = bytearray()
+    for i in range(len(ts) // pkt):
+        b = ts[i * pkt:(i + 1) * pkt]
+        if len(b) < pkt or b[0] != 0x47:
+            continue
+        pid = ((b[1] & 0x1f) << 8) | b[2]
+        pusi = bool(b[1] & 0x40)
+        afc = (b[3] >> 4) & 0x3
+        off = 4
+        if afc in (2, 3):
+            off += 1 + b[4]
+        if off >= pkt:
+            continue
+        data = b[off:]
+        if not pusi:
+            if vid_pid is not None and pid == vid_pid:
+                payload += data
+            continue
+        # PES（视频包）以 00 00 01 开头；PSI（PAT/PMT）前面是一个 pointer_field（通常是 0）
+        if data[:3] == b'\x00\x00\x01':
+            if vid_pid is not None and pid == vid_pid and len(data) > 9:
+                hl = data[8]
+                if 9 + hl < pkt:
+                    payload += data[9 + hl:]
+        elif data[:1] == b'\x00' and len(data) > 1:
+            ptr = data[0]
+            sec = data[1 + ptr:]
+            if not sec:
+                continue
+            tid = sec[0]
+            if pid == 0 and tid == 0x00 and len(sec) >= 8:
+                seclen = ((sec[1] & 0x0f) << 8) | sec[2]
+                body = sec[8:max(8, 3 + seclen - 4)]
+                for j in range(0, len(body) - 3, 4):
+                    pnum = (body[j] << 8) | body[j + 1]
+                    if pnum:
+                        pmt_pid = ((body[j + 2] & 0x1f) << 8) | body[j + 3]
+            elif pmt_pid is not None and pid == pmt_pid and tid == 0x02 and len(sec) >= 12:
+                seclen = ((sec[1] & 0x0f) << 8) | sec[2]
+                gil = ((sec[10] & 0x0f) << 8) | sec[11]
+                j, end = 12 + gil, min(len(sec), 3 + seclen - 4)
+                while j + 5 <= end:
+                    t = sec[j]
+                    ep = ((sec[j + 1] & 0x1f) << 8) | sec[j + 2]
+                    if stype is None and t not in (0x0f, 0x03, 0x04, 0x81, 0x86, 0x87):
+                        stype, vid_pid = t, ep
+                    j += 5 + (((sec[j + 3] & 0x0f) << 8) | sec[j + 4])
+    if payload:
+        buf = bytes(payload)
+        k = buf.find(b'\x00\x00\x01\x67')
+        if k >= 0 and k + 4 < len(buf):
+            sps = buf[k + 4]   # k+3 是 NAL 头（0x67），k+4 才是 profile_idc
+    return stype, sps
+
+
+def vod_check(pid, cid):
+    """返回 {'ok':bool,'code':'drm'|'codec','msg':...}；判不出来一律当能放，不误杀正常片子"""
+    import re
+    s = _svc()
+    raw = getattr(s, 'vod_playlist_raw', None)
+    if not callable(raw):
+        return None
+    # 成剧必须拿第 1 集去签：整部的 contentID 上游直接回 144020013（media is not exist）
+    ep_pid, ep_cid = str(pid), str(cid)
+    fn_eps = globals().get('vod_episodes')
+    if callable(fn_eps):
+        try:
+            eps = fn_eps(str(pid), str(cid)) or []
+            if eps:
+                ep_pid, ep_cid = str(eps[0]['pid']), str(eps[0]['cid'])
+        except Exception:
+            pass
+    ent = {}
+    for p_, c_ in ((ep_pid, ep_cid), (str(pid), str(cid))):
+        try:
+            ent = raw(p_, c_) or {}
+            break
+        except Exception:
+            ent = {}
+    text = ent.get('text') or ''
+    if re.search(r'#EXT-X-KEY[^\r\n]*METHOD=(?!NONE)', text, re.I) \
+            or 'KEYFORMAT="copyrightDRM"' in text:
+        return {'ok': False, 'code': 'drm',
+                'msg': '这部片是版权方加密的（DRM 保护），本机播放器解不了；'
+                       '不是外壳坏了，官方机顶盒里才放得出来。'}
+    segs = ent.get('segs') or []
+    if not segs:
+        return None
+    u = segs[0]
+    if not u.startswith('http'):
+        u = (ent.get('base') or '') + '/' + u
+    try:
+        head = _head(u)
+    except Exception:
+        return None
+    stype, prof = _ts_probe(head)
+    if stype in _AVS_TYPES:
+        return {'ok': False, 'code': 'codec',
+                'msg': '这集的视频用的是 AVS 编码（国产标准），本机 mpv / VLC 解不了。'}
+    if stype == 0x1b and prof is not None and prof not in _SPS_OK:
+        return {'ok': False, 'code': 'codec',
+                'msg': '这集的视频码流不是标准 H.264（源站私有编码 / 加密），'
+                       '本机播放器解不了，不是外壳的问题。'}
+    return {'ok': True, 'code': '', 'msg': ''}
+
