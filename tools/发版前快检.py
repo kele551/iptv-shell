@@ -210,7 +210,64 @@ def check_token_warn():
             proc.kill()
 
 
-# ---------- ⑤ 真实界面截图 ----------
+# ---------- ⑤ 真实线路的台名必须是名字，不许拿 34 位编码顶 ----------
+# 2026-11-24 教训：接口全 200、条数 143 全绿，界面却整列 34 位编码 + 暂无节目单。
+# 之前只拿 mock 的干净数据做断言，真实线路的坏数据根本没进闸门 → 用户先看见。
+def check_live_names():
+    lc, lp = line_cfg()
+    prov = lc.get("provider") or ""
+    if not prov or prov == "mock":
+        add(True, "台名不拿编码顶", "skip：这台机器没装真实线路（只有 mock）")
+        return
+    port = free_port()
+    env = dict(os.environ)
+    if lc.get("svc_py"):
+        env["IPTV_SVC_PY"] = lc["svc_py"]
+    proc = subprocess.Popen([PY, os.path.join(PROJ, "server.py"),
+                             "--port", str(port), "--provider", prov],
+                            cwd=PROJ, env=env,
+                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        up = False
+        for _ in range(60):
+            try:
+                urllib.request.urlopen("http://127.0.0.1:%d/status" % port, timeout=2).read()
+                up = True
+                break
+            except Exception:
+                time.sleep(0.3)
+        if not up:
+            add(False, "台名不拿编码顶", "真实线路服务没起来")
+            return
+        data, items = None, []
+        for _ in range(40):
+            try:
+                data = json.loads(urllib.request.urlopen(
+                    "http://127.0.0.1:%d/api/live.json" % port, timeout=15).read()
+                    .decode("utf-8", "replace"))
+                items = [it for g in (data.get("groups") or [])
+                         for it in (g.get("items") or [])]
+            except Exception:
+                items = []
+            if items:
+                break
+            time.sleep(1)
+        bad = [str(it.get("name") or "") for it in items
+               if not it.get("name") or re.fullmatch(r"\d{12,}", str(it.get("name")) or "")]
+        ok = len(items) >= 80 and not bad
+        detail = "线路=%s，%d 台，坏名 %d 个%s" % (
+            prov, len(items), len(bad),
+            ("（如 %s）" % "、".join(bad[:2])) if bad else "")
+        add(ok, "台名不拿编码顶", detail)
+    finally:
+        proc.terminate()
+        try:
+            proc.wait(timeout=8)
+        except Exception:
+            proc.kill()
+
+
+# ---------- ⑥ 真实界面截图 ----------
 def shot(url, path, click_text=None):
     code = (
         "from playwright.sync_api import sync_playwright\n"
@@ -229,6 +286,21 @@ def shot(url, path, click_text=None):
     r = subprocess.run([PY, "-c", code], capture_output=True, text=True,
                        encoding="utf-8", errors="replace", timeout=180)
     return r.returncode == 0 and os.path.exists(path)
+
+
+def page_text(url):
+    code = (
+        "from playwright.sync_api import sync_playwright\n"
+        "with sync_playwright() as p:\n"
+        "    b=p.chromium.launch(channel='msedge')\n"
+        "    pg=b.new_page(viewport={'width':1360,'height':900})\n"
+        "    pg.goto(%r, wait_until='networkidle', timeout=60000)\n"
+        "    pg.wait_for_timeout(3000)\n"
+        "    print(pg.locator('body').inner_text())\n"
+        "    b.close()\n" % (url,))
+    r = subprocess.run([PY, "-c", code], capture_output=True, text=True,
+                       encoding="utf-8", errors="replace", timeout=180)
+    return (r.stdout or "").strip()
 
 
 def check_ui():
@@ -256,6 +328,12 @@ def check_ui():
         size = min(os.path.getsize(p) if os.path.exists(p) else 0 for p in (live, vod))
         add(ok1 and ok2 and size > 20 * 1024, "真实界面截图",
             "直播/点播两张，最小 %d B（%s）" % (size, os.path.relpath(SHOTS, ROOT)))
+        # 截图之外再断言一遍：整页不许出现长编码台名（用户最先看见的就是这个）
+        txt = page_text("http://127.0.0.1:%d/" % port)
+        bad = re.findall(r"\d{12,}", txt)
+        add(bool(txt) and not bad, "界面无长编码台名",
+            "整页干净" if txt and not bad else
+            ("读到 %d 个长编码（如 %s）" % (len(bad), bad[0]) if txt else "页面没读到内容"))
     finally:
         proc.terminate()
         try:
@@ -309,6 +387,7 @@ def main():
     print("=" * 60)
     check_start()
     check_features()
+    check_live_names()
     check_token_warn()
     if not a.no_ui:
         check_ui()

@@ -87,11 +87,17 @@ def channels():
             out = []
             for code in codes:
                 m = (meta or {}).get(code, {}) if isinstance(meta, dict) else {}
-                out.append({'code': code,
-                            'name': m.get('name') or code,
+                nm = m.get('name') or ''
+                # 2026-11-24 修：目录没载完时 load_meta 会空，早先拿 code 顶名字，
+                # 界面上就出现一长串 34 位 ID（用户截图）。没名字的条目宁可不显示，
+                # 让下面的 s.channels() 路径接手，绝不把编码当台名糊给用户。
+                if not nm or nm == code:
+                    continue
+                out.append({'code': code, 'name': nm,
                             'group': m.get('group') or '',
                             'num': m.get('num') or ''})
-            if out:
+            # 名字缺失超过两成说明目录还没载完，别拿半份名单糊弄，交给后面的路径
+            if out and len(out) >= max(1, int(len(codes) * 0.8)):
                 return out
         except Exception:
             pass
