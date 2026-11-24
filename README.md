@@ -267,6 +267,8 @@ python tools\模板快检.py --provider m3u
 
 MIT，见 `LICENSE`。
 
+## 检索关键词 / Search keywords
 
+**中文**：IPTV 外壳、IPTV 播放器、直播播放器、m3u 播放器、m3u8、节目单、EPG、点播、海报墙、电视直播、mpv、VLC、Windows
 
-
+**English**: iptv shell, iptv player, m3u player, m3u8 player, hls player, live tv player, epg, vod, poster wall, media player, mpv, vlc
