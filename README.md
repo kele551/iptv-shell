@@ -3,8 +3,6 @@
 
 <h1>IPTV 外壳</h1>
 
-  <p>🔗 我的其他工具：<a href="https://kele551-apps.pages.dev/">工具合集</a> · <a href="https://github.com/kele551">作者主页</a></p>
-
 <p><a href="https://kele551.github.io/iptv-shell/"><img alt="打开官网 · 图文安装说明" src="https://img.shields.io/badge/%F0%9F%91%89_%E6%89%93%E5%BC%80%E5%AE%98%E7%BD%91-%E5%9B%BE%E6%96%87%E5%AE%89%E8%A3%85%E8%AF%B4%E6%98%8E-1f5fd0?style=for-the-badge"></a></p>
 
 <p><b>先拿东西</b>：<a href="https://kele551.github.io/iptv-shell/download/iptv-shell-Windows.zip"><b>⬇ 免安装包 · Windows（9.8 MB，这台电脑不用装 Python）</b></a><br>
@@ -269,8 +267,6 @@ python tools\模板快检.py --provider m3u
 
 MIT，见 `LICENSE`。
 
-## 检索关键词 / Search keywords
 
-**中文**：IPTV 外壳、IPTV 播放器、直播播放器、m3u 播放器、m3u8、节目单、EPG、点播、海报墙、电视直播、mpv、VLC、Windows
 
-**English**: iptv shell, iptv player, m3u player, m3u8 player, hls player, live tv player, epg, vod, poster wall, media player, mpv, vlc
+

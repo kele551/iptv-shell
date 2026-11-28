@@ -12,8 +12,10 @@
 :root{
   --bg:#0c1220; --bg-1:#111a2b; --bg-2:#18243a; --bg-3:#22314c; --bg-deep:#080d16;
   --line:#22314c; --line-soft:#18243a;
-  --ink:#f2f7ff; --ink-2:#c2d1e8; --ink-3:#91a3c0; --ink-4:#647690;
-  --blue:#4c9aff; --blue-deep:#1f6feb; --green:#6ee7a8; --amber:#e3b341; --red:#e5484d;
+  --ink:#f2f7ff; --ink-2:#c2d1e8; --ink-3:#91a3c0; --ink-4:#7b8da8;
+  --blue:#4c9aff; --blue-deep:#1f6feb; --blue-cta:#1f6feb; --blue-cta-hover:#2f6fe0;
+  --green:#6ee7a8; --amber:#e3b341; --red:#e5484d;
+  --ink-on-white:#5b6b82;
   --fs-xs:12px; --lh-xs:16px; --fs-sm:14px; --lh-sm:20px; --fs-base:16px; --lh-base:24px;
   --fs-lg:18px; --lh-lg:28px; --fs-xl:20px; --lh-xl:28px; --fs-2xl:24px; --lh-2xl:32px;
   --fs-3xl:30px; --lh-3xl:36px; --fs-5xl:48px; --lh-5xl:48px;
@@ -43,17 +45,16 @@ nav a.n:hover{color:var(--ink)}
 .btn:active{transform:scale(.98)}
 .btn.quiet{background:transparent;border-color:var(--bg-3);color:var(--ink-3);font-weight:400}
 .btn.quiet:hover{color:#fff;border-color:var(--ink-4)}
-.btn.pri{background:var(--blue);color:#fff;border-color:var(--blue);padding:var(--sp-200) var(--sp-300)}
-.btn.pri:hover{background:#6aabff}
+.btn.pri{background:var(--blue-cta);color:#fff;border-color:var(--blue-cta);padding:var(--sp-200) var(--sp-300)}
+.btn.pri:hover{background:var(--blue-cta-hover);border-color:var(--blue-cta-hover)}
 .btn.small{padding:var(--sp-75) var(--sp-100);font-size:var(--fs-sm)}
 
 .hero{padding:var(--sp-600) 0 var(--sp-400)}
 .hero .grid{display:grid;grid-template-columns:1.02fr .98fr;gap:var(--sp-600);align-items:center}
 .eyebrow{display:inline-flex;align-items:center;gap:var(--sp-100);font-size:var(--fs-xs);line-height:var(--lh-xs);color:var(--ink-3);
   background:var(--bg-1);border:1px solid var(--line);border-radius:var(--r-full);padding:var(--sp-75) var(--sp-200)}
-h1{font-size:var(--fs-5xl);line-height:var(--lh-5xl);letter-spacing:-1px;margin:var(--sp-300) 0 var(--sp-200);font-weight:600;
-  background:linear-gradient(90deg,#fff,#9b9b9b);-webkit-background-clip:text;background-clip:text;color:transparent}
-h1 span{font-weight:400;color:#b8b8b8;-webkit-text-fill-color:#b8b8b8;background:none}
+h1{font-size:var(--fs-5xl);line-height:var(--lh-5xl);letter-spacing:-1px;margin:var(--sp-300) 0 var(--sp-200);font-weight:600;color:var(--ink)}
+h1 span{font-weight:400;color:var(--ink-2)}
 .lede{font-size:var(--fs-lg);line-height:var(--lh-lg);color:var(--ink-3);max-width:30em;margin:0 0 var(--sp-300)}
 .lede b{color:var(--ink);font-weight:600}
 .hero .acts{display:flex;gap:var(--sp-200);flex-wrap:wrap;align-items:center}
@@ -67,7 +68,7 @@ h1 span{font-weight:400;color:#b8b8b8;-webkit-text-fill-color:#b8b8b8;background
 .section h2{font-size:var(--fs-3xl);line-height:var(--lh-3xl);letter-spacing:0;margin:0 0 var(--sp-100);font-weight:600}
 .section .sub{color:var(--ink-3);font-size:var(--fs-lg);line-height:var(--lh-lg);margin:0 0 var(--sp-400);max-width:42em}
 
-.notice{background:var(--bg-1);border:1px solid var(--line);border-left:4px solid var(--amber);border-radius:var(--r-lg);padding:var(--sp-300)}
+.notice{background:var(--bg-1);border:1px solid rgba(227,179,65,.38);border-radius:var(--r-lg);padding:var(--sp-300)}
 .notice .nt{display:flex;gap:var(--sp-100);align-items:baseline;flex-wrap:wrap;margin-bottom:var(--sp-100)}
 .notice .nt span{font-size:var(--fs-xs);line-height:var(--lh-xs);font-weight:600;color:var(--amber);background:var(--bg-2);border-radius:var(--r-full);padding:var(--sp-50) var(--sp-100)}
 .notice .nt b{font-size:var(--fs-xl);line-height:var(--lh-xl);font-weight:600}
@@ -99,7 +100,7 @@ h1 span{font-weight:400;color:#b8b8b8;-webkit-text-fill-color:#b8b8b8;background
 .step{display:grid;grid-template-columns:44px 1fr;gap:var(--sp-200);background:var(--bg-1);border:1px solid var(--line);
   border-radius:var(--r-lg);padding:var(--sp-300)}
 .step .n{counter-increment:s;display:grid;place-items:center;width:34px;height:34px;border-radius:var(--r-full);
-  background:var(--blue);color:#fff;font-size:var(--fs-sm);font-weight:600}
+  background:var(--blue-cta);color:#fff;font-size:var(--fs-sm);font-weight:600}
 .step .t{font-weight:600;margin-bottom:var(--sp-50)}
 .step .d{color:var(--ink-3);font-size:var(--fs-sm)}
 .step code{background:var(--bg-2);border:1px solid var(--bg-3);border-radius:var(--r-sm);padding:var(--sp-50) var(--sp-100);font-size:var(--fs-xs);
@@ -111,8 +112,8 @@ h1 span{font-weight:400;color:#b8b8b8;-webkit-text-fill-color:#b8b8b8;background
 .agentbox textarea{width:100%;height:186px;background:var(--bg);color:var(--ink-2);border:1px solid var(--bg-3);
   border-radius:var(--r-md);padding:var(--sp-200);font-size:var(--fs-sm);line-height:1.8;resize:vertical}
 .agentbox .row{display:flex;gap:var(--sp-200);align-items:center;margin-top:var(--sp-200);flex-wrap:wrap}
-.agentbox .btn{background:var(--blue);border-color:var(--blue);color:#fff}
-.agentbox .btn:hover{background:#6aabff}
+.agentbox .btn{background:var(--blue-cta);border-color:var(--blue-cta);color:#fff}
+.agentbox .btn:hover{background:var(--blue-cta-hover);border-color:var(--blue-cta-hover)}
 .agentbox .hint{font-size:var(--fs-xs);color:var(--ink-4)}
 
 .faq{display:grid;gap:var(--sp-100)}
@@ -139,7 +140,7 @@ td b{color:var(--ink)}
 .tabs2 button{border:0;background:transparent;color:var(--ink-3);padding:var(--sp-100) var(--sp-200);border-radius:var(--r-sm);font-size:var(--fs-sm);line-height:var(--lh-sm);font-weight:500;cursor:pointer;transition:background-color var(--dur) var(--ease),color var(--dur) var(--ease),transform var(--dur) var(--ease)}
 .tabs2 button:hover{background:var(--bg-2);color:var(--ink)}
 .tabs2 button:active{transform:scale(.98)}
-.tabs2 button.on{background:var(--blue);color:#fff}
+.tabs2 button.on{background:var(--blue-cta);color:#fff}
 .pane{display:none}
 .pane.on{display:block}
 .chips{display:flex;gap:var(--sp-100);flex-wrap:wrap;margin:var(--sp-50) 0}
@@ -157,7 +158,7 @@ td b{color:var(--ink)}
 .steps2{display:grid;gap:var(--sp-100);margin-top:var(--sp-100)}
 .s2{display:grid;grid-template-columns:34px 1fr;gap:var(--sp-200);background:var(--bg);border:1px solid var(--bg-3);
   border-radius:var(--r-md);padding:var(--sp-300)}
-.s2>span{width:30px;height:30px;border-radius:var(--r-full);background:var(--blue);color:#fff;display:grid;place-items:center;
+.s2>span{width:30px;height:30px;border-radius:var(--r-full);background:var(--blue-cta);color:#fff;display:grid;place-items:center;
   font-weight:600;font-size:var(--fs-xs)}
 .s2 b{color:#fff;font-weight:600}
 .s2 div{color:var(--ink-3);font-size:var(--fs-sm);line-height:1.8}
@@ -170,13 +171,13 @@ td b{color:var(--ink)}
 .sponsor .spsub{color:var(--ink-3);font-size:var(--fs-base);line-height:var(--lh-base);margin:0 0 var(--sp-300)}
 .sponsor .qrbox{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--sp-200) var(--sp-200) var(--sp-100)}
 .sponsor .qrbox img{display:block;border-radius:var(--r-md)}
-.sponsor .qrt{font-size:var(--fs-xs);color:var(--ink-3);margin-top:var(--sp-100)}
+.sponsor .qrt{font-size:var(--fs-xs);color:var(--ink-on-white);margin-top:var(--sp-100)}
 .sponsor .spnote{color:var(--ink-4);font-size:var(--fs-sm);margin:var(--sp-200) 0 0}
 
 footer{padding:var(--sp-500) 0 var(--sp-800);border-top:1px solid var(--line);color:var(--ink-3);font-size:var(--fs-sm)}
 footer .row{display:flex;gap:var(--sp-300);flex-wrap:wrap;align-items:center}
 footer .r{margin-left:auto;color:var(--ink-4);font-size:var(--fs-xs)}
-.toast{position:fixed;left:50%;bottom:var(--sp-400);transform:translate(-50%,8px);background:var(--blue);color:#fff;
+.toast{position:fixed;left:50%;bottom:var(--sp-400);transform:translate(-50%,8px);background:var(--blue-cta);color:#fff;
   padding:var(--sp-100) var(--sp-300);border-radius:var(--r-full);font-size:var(--fs-sm);line-height:var(--lh-sm);opacity:0;transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease);pointer-events:none;z-index:40}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 @media(max-width:920px){
@@ -288,12 +289,12 @@ footer .r{margin-left:auto;color:var(--ink-4);font-size:var(--fs-xs)}
   <div class="pane on" id="p-agent">
     <p class="in-sub">复制给能在电脑上运行命令的 Agent，比如：</p>
     <div class="chips">
-      <span class="chip"><i style="background:#2aa07a">W</i>WorkBuddy</span>
+      <span class="chip"><i style="background:#1e7f61">W</i>WorkBuddy</span>
       <span class="chip"><i style="background:#3a6df0">豆</i>豆包电脑版</span>
       <span class="chip"><i style="background:#6b4ef0">千</i>千问电脑版</span>
-      <span class="chip"><i style="background:#17a673">T</i>Trae</span>
-      <span class="chip"><i style="background:#d97757">C</i>Claude Code</span>
-      <span class="chip"><i style="background:#3f7de0">C</i>Codex</span>
+      <span class="chip"><i style="background:#0d7d55">T</i>Trae</span>
+      <span class="chip"><i style="background:#a8543a">C</i>Claude Code</span>
+      <span class="chip"><i style="background:#2b5cbf">C</i>Codex</span>
     </div>
     <p class="in-note">手机上的对话只会给你步骤，不能动手；要在电脑上跑命令的那种。</p>
     <div class="codebox">

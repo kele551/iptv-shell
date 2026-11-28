@@ -1,0 +1,13 @@
+# IPTV 外壳模板 —— 依赖清单（打包机用；最终用户不需要装任何东西）
+#
+# launch.py / server.py / providers / tools 全部只用 Python 标准库
+# （http.server / urllib / socket / xml.etree / zipfile / importlib 等），
+# 不引第三方包是模板的硬约束：换个智能体接手、换台机器都能直接跑。
+#
+# 打包解释器统一写死（rules\01 §0 第 33 条）：
+#   F:\Harness\toolchain\python\versions\3.15.2\python.exe
+#   pwsh -File tools\打包免安装包.ps1   （内部已指向 3.15.2，--onedir 出 IPTV-Shell.exe + zip）
+#
+# 本文件只是把「打包需要什么」写清楚，不改变模板零依赖的事实。
+
+pyinstaller==6.22.3

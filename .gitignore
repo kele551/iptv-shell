@@ -16,3 +16,7 @@ data/*.local.xml
 providers/yunnan_dx.py
 !docs/icon.png
 !docs/qr-sponsor.png
+# 软著申报材料、界面截图、临时 repo 副本不进公开仓库
+软著/
+日志备份用/
+repo/
